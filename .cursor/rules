@@ -1,0 +1,79 @@
+# Django Ninja API - State of the Art Development Rules
+
+## Core Principles
+
+You are an expert in Python, Django, Django Ninja, and modern API development best practices.
+
+### Technology Stack
+- **Framework**: Django 5.x with Django Ninja 1.x
+- **Database**: PostgreSQL with django-postgres-extensions
+- **Authentication**: JWT (djangorestframework-simplejwt) 
+- **Validation**: Pydantic v2 for schemas
+- **Testing**: pytest with pytest-django
+- **Code Quality**: ruff for linting/formatting, mypy for type checking
+- **Documentation**: Auto-generated OpenAPI/Swagger via Django Ninja
+- **Async Support**: ASGI with uvicorn, async views where beneficial
+
+### General Rules
+- Use Python 3.11+ features (type hints, match/case, etc.)
+- Follow PEP 8 with line length of 100 characters
+- Use type hints for all function signatures
+- Prefer composition over inheritance
+- Use dataclasses or Pydantic models for data structures
+- Write docstrings for all public functions/classes (Google style)
+- Keep functions small and focused (max 20 lines ideally)
+
+
+#### Schema Design
+- Use Pydantic v2 models for request/response schemas
+- Separate input schemas from output schemas
+- Use `Schema` suffix for Pydantic models
+- Leverage Field() for validation and documentation
+
+### Queries
+- Always use select_related() for foreign keys
+- Use prefetch_related() for many-to-many and reverse foreign keys
+- Add database indexes for frequently queried fields
+- Use annotate() for aggregations
+- Avoid N+1 queries at all costs
+
+### Test Coverage
+- Aim for 80%+ coverage
+- Test all API endpoints
+- Test authentication and permissions
+- Test error cases and edge cases
+- Mock external services
+
+## Deployment Checklist
+
+- [ ] Set DEBUG=False in production
+- [ ] Use strong SECRET_KEY
+- [ ] Enable HTTPS only (SECURE_SSL_REDIRECT=True)
+- [ ] Set up proper CORS
+- [ ] Configure database connection pooling
+- [ ] Set up Redis for caching and sessions
+- [ ] Enable rate limiting
+- [ ] Set up error tracking (Sentry)
+- [ ] Configure structured logging
+- [ ] Set up health check endpoint
+- [ ] Run migrations before deployment
+- [ ] Collect static files
+- [ ] Set up database backups
+- [ ] Configure monitoring (Prometheus/Grafana)
+
+## Code Review Checklist
+
+Before committing code, verify:
+- [ ] Type hints on all functions
+- [ ] Docstrings on public functions
+- [ ] No hardcoded secrets
+- [ ] Proper error handling
+- [ ] Tests written and passing
+- [ ] No N+1 queries
+- [ ] Async used where beneficial
+- [ ] Proper authentication/authorization
+- [ ] Input validation via Pydantic
+- [ ] Logging added for important operations
+- [ ] OpenAPI documentation is accurate
+- [ ] Code formatted with ruff
+- [ ] Type checking passes (mypy)
