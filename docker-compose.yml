@@ -1,28 +1,5 @@
-version: '3.8'
-
+# Django Application connecting to existing PostgreSQL database
 services:
-  # PostgreSQL Database
-  db:
-    image: postgres:16-alpine
-    container_name: autoapply_db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DB_NAME:-autoapply}
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      PGDATA: /var/lib/postgresql/data/pgdata
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"
-    networks:
-      - autoapply_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-autoapply}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # Django Application
   web:
     build: .
@@ -39,12 +16,9 @@ services:
       - "8000:8000"
     env_file:
       - .env
-    environment:
-      - DB_HOST=db
-      - DB_PORT=5432
-    depends_on:
-      db:
-        condition: service_healthy
+    # Connect to host's PostgreSQL via host network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - autoapply_network
     healthcheck:
@@ -75,7 +49,6 @@ services:
       - autoapply_network
 
 volumes:
-  postgres_data:
   static_volume:
   media_volume:
 

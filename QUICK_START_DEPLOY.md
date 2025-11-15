@@ -37,8 +37,8 @@ SECRET_KEY = <generate using: python -c "import secrets; print(secrets.token_url
 ALLOWED_HOSTS = api.project100x.run.place,5.75.171.23
 CORS_ALLOWED_ORIGINS = https://project100x.run.place
 DB_NAME = autoapply
-DB_USER = postgres
-DB_PASSWORD = <your-strong-password>
+DB_USER = admin
+DB_PASSWORD = <your-existing-postgres-password>
 ```
 
 ### Step 3: Deploy

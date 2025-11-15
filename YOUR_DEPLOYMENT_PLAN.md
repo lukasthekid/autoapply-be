@@ -25,11 +25,12 @@
 
 ---
 
-### Phase 2: Server Setup (One-Time) ⏱️ 10 minutes
+### Phase 2: Server Setup & Database Configuration ⏱️ 15 minutes
 
-**Docker is already installed ✅**
+**Docker is already installed ✅**  
+**PostgreSQL is already running ✅** (postgres:18.1-alpine on port 5433)
 
-Now let's install Docker Compose and set up the environment:
+Now let's install Docker Compose and set up the database:
 
 ```bash
 # SSH to your server
@@ -66,9 +67,19 @@ docker ps
 # If docker ps fails, add your user to docker group:
 # sudo usermod -aG docker $USER
 # Then log out and log back in
+
+# Create autoapply database in your existing PostgreSQL
+echo "Creating autoapply database..."
+docker exec -it postgres psql -U admin -d global -c "CREATE DATABASE autoapply;"
+docker exec -it postgres psql -U admin -d global -c "GRANT ALL PRIVILEGES ON DATABASE autoapply TO admin;"
+
+# Verify database was created
+docker exec -it postgres psql -U admin -d autoapply -c "SELECT version();"
 ```
 
-**⚠️ Important**: If you had to add your user to the docker group, log out and log back in before continuing!
+**⚠️ Important**: 
+1. If you had to add your user to the docker group, log out and log back in before continuing!
+2. The autoapply database is now created in your existing PostgreSQL ✅
 
 ---
 
@@ -87,8 +98,8 @@ Add these secrets:
 | `ALLOWED_HOSTS` | `api.project100x.run.place,5.75.171.23` |
 | `CORS_ALLOWED_ORIGINS` | `https://project100x.run.place` |
 | `DB_NAME` | `autoapply` |
-| `DB_USER` | `postgres` |
-| `DB_PASSWORD` | Create a strong password |
+| `DB_USER` | `admin` |
+| `DB_PASSWORD` | Your existing PostgreSQL password |
 
 **To get your SSH private key contents:**
 

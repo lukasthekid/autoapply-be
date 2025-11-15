@@ -264,7 +264,7 @@ Need help? Check the documentation or review the troubleshooting sections.
 - SSH Key: `C:\Users\lukb9\.ssh\id_ed25519`
 - Frontend: `https://project100x.run.place/` ✅
 - Backend: `https://api.project100x.run.place/` (to be deployed)
-- Database: PostgreSQL (included in Docker Compose)
+- Database: PostgreSQL 18-alpine ✅ (already running on host - `postgres` container on port 5433)
 - Web Server: Nginx (included in Docker Compose)
 
 ---
