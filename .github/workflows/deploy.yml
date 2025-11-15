@@ -137,7 +137,6 @@ jobs:
       - name: Copy docker-compose files to server
         run: |
           scp -i ~/.ssh/id_ed25519 docker-compose.yml docker-compose.prod.yml ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:~/autoapply-be/
-          scp -i ~/.ssh/id_ed25519 -r nginx ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:~/autoapply-be/
       
       - name: Create .env file on server
         run: |
