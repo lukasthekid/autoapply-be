@@ -18,7 +18,7 @@ services:
       - .env
     networks:
       - autoapply_network
-      - postgres_network  # Connect to existing postgres network
+      - postgres_postgres_network  # Connect to existing postgres network
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/docs').read()"]
       interval: 30s
@@ -33,6 +33,6 @@ volumes:
 networks:
   autoapply_network:
     driver: bridge
-  postgres_network:
+  postgres_postgres_network:
     external: true  # Use the existing postgres network
 

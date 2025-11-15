@@ -162,6 +162,13 @@ jobs:
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           '
       
+      - name: Create database if not exists
+        run: |
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} '
+            docker exec postgres psql -U admin -d global -c "CREATE DATABASE autoapply;" 2>/dev/null || echo "Database already exists"
+            docker exec postgres psql -U admin -d global -c "GRANT ALL PRIVILEGES ON DATABASE autoapply TO admin;"
+          '
+      
       - name: Deploy with Docker Compose
         run: |
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} '
@@ -169,6 +176,7 @@ jobs:
             docker compose -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+            sleep 5
             docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T web python manage.py migrate
             docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput
           '
