@@ -69,19 +69,22 @@ Internet
 └──────────────┬──────────────────────────┘
                │
                ▼
-┌──────────────────────────────────────────┐
-│   Django Container (autoapply_web)       │
-│   Port: 8000                             │
-│   Image: ghcr.io/lukasthekid/...         │
-└──────────────┬───────────────────────────┘
-               │ host.docker.internal:5433
-               ▼
-┌──────────────────────────────────────────┐
-│   Existing PostgreSQL Container          │
-│   (postgres:18.1-alpine)                 │
-│   Port: 127.0.0.1:5433                   │
-│   Database: autoapply                    │
-└──────────────────────────────────────────┘
+┌────────────────────────────────────────────────┐
+│         postgres_network (Docker network)      │
+│  ┌──────────────────────────────────────────┐ │
+│  │ Django Container (autoapply_web)         │ │
+│  │ Port: 8000                               │ │
+│  │ Image: ghcr.io/lukasthekid/...           │ │
+│  └──────────────┬───────────────────────────┘ │
+│                 │ postgres:5432                │
+│                 ▼                              │
+│  ┌──────────────────────────────────────────┐ │
+│  │ Existing PostgreSQL Container            │ │
+│  │ (postgres:18.1-alpine)                   │ │
+│  │ Port: 5432 (internal)                    │ │
+│  │ Database: autoapply                      │ │
+│  └──────────────────────────────────────────┘ │
+└────────────────────────────────────────────────┘
 ```
 
 ---

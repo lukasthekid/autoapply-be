@@ -69,19 +69,22 @@
 
 ### ✅ After (Current setup):
 ```
-┌─────────────────────────┐
-│  Django Container       │
-│  (autoapply_web)        │
-│  Port: 8000             │
-└────────┬────────────────┘
-         │ host.docker.internal:5433
-         ▼
-┌─────────────────────────┐
-│  Your Existing          │ ✅ No conflict!
-│  PostgreSQL Container   │    Using existing DB
-│  (postgres)             │
-│  Port: 127.0.0.1:5433   │
-└─────────────────────────┘
+        postgres_network (shared Docker network)
+        ┌──────────────────────────────────┐
+        │                                  │
+        │  ┌──────────────────────┐       │
+        │  │ Django Container     │       │
+        │  │ (autoapply_web)      │       │
+        │  │ Port: 8000           │       │
+        │  └──────────┬───────────┘       │
+        │             │ postgres:5432     │
+        │             ▼                    │
+        │  ┌──────────────────────┐       │
+        │  │ PostgreSQL Container │ ✅     │
+        │  │ (postgres)           │ No     │
+        │  │ Port: 5432 (internal)│ conflict!
+        │  └──────────────────────┘       │
+        └──────────────────────────────────┘
 ```
 
 ---
@@ -133,10 +136,11 @@ The deployment should now succeed! ✅
 
 ## How It Works Now
 
-1. **Your existing PostgreSQL** (`postgres` container) runs on host
-2. **Django container** connects to host using `host.docker.internal:5433`
-3. **Django creates its tables** in the `autoapply` database via migrations
-4. **No port conflicts**, no duplicate databases!
+1. **Your existing PostgreSQL** (`postgres` container) is on `postgres_network`
+2. **Django container** joins the same `postgres_network`
+3. **Django connects** directly to `postgres:5432` using Docker internal DNS
+4. **Django creates its tables** in the `autoapply` database via migrations
+5. **No port conflicts**, no duplicate databases, secure container-to-container communication!
 
 ---
 
@@ -144,8 +148,8 @@ The deployment should now succeed! ✅
 
 ### From Docker Container (Django):
 ```
-DB_HOST=host.docker.internal
-DB_PORT=5433
+DB_HOST=postgres
+DB_PORT=5432
 DB_USER=admin
 DB_PASSWORD=your-password
 DB_NAME=autoapply

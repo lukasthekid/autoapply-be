@@ -16,11 +16,9 @@ services:
       - "8000:8000"
     env_file:
       - .env
-    # Connect to host's PostgreSQL via host network
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     networks:
       - autoapply_network
+      - postgres_network  # Connect to existing postgres network
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/docs').read()"]
       interval: 30s
@@ -35,4 +33,6 @@ volumes:
 networks:
   autoapply_network:
     driver: bridge
+  postgres_network:
+    external: true  # Use the existing postgres network
 

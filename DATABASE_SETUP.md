@@ -53,9 +53,9 @@ Your `.env` file should have:
 
 ```env
 # Database Configuration
-# Connect to existing PostgreSQL on host
-DB_HOST=host.docker.internal
-DB_PORT=5433
+# Connect to existing PostgreSQL via Docker network
+DB_HOST=postgres
+DB_PORT=5432
 DB_NAME=autoapply
 DB_USER=admin  # or autoapply_user if you created one
 DB_PASSWORD=your-database-password
@@ -63,34 +63,19 @@ DB_PASSWORD=your-database-password
 
 ### How it Works:
 
-1. **Your PostgreSQL container** runs on host with port `127.0.0.1:5433:5432`
-2. **Django container** uses `host.docker.internal` to reach the host
-3. **Django connects** to `host.docker.internal:5433` which maps to your PostgreSQL
+1. **Your PostgreSQL container** is named `postgres` and runs on `postgres_network`
+2. **Django container** joins the same `postgres_network`
+3. **Django connects** directly to `postgres:5432` using container name (internal Docker DNS)
 
-## Alternative: Connect Both to Same Network
+## Current Setup (Recommended)
 
-If you prefer, you can connect both containers to the same network:
+✅ **Both containers on same Docker network** (`postgres_network`)
 
-### Option A: Add Django containers to postgres_network
-
-Update `docker-compose.yml`:
-
-```yaml
-networks:
-  postgres_network:
-    external: true  # Use existing postgres_network
-```
-
-And set in `.env`:
-
-```env
-DB_HOST=postgres  # container name
-DB_PORT=5432      # internal port
-```
-
-### Option B: Use host.docker.internal (Current Setup - Recommended)
-
-This is what we're using now. It's simpler and doesn't require network changes.
+This is the most reliable and secure approach:
+- Direct container-to-container communication
+- No need to expose PostgreSQL to host
+- Uses Docker's internal DNS
+- Better performance
 
 ## Step 4: Run Migrations
 
@@ -148,17 +133,15 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO admin;
 \q
 ```
 
-### host.docker.internal not working
+### Network connection issues
 
-If `host.docker.internal` doesn't work on your Linux server:
+If you get "connection refused":
 
 ```bash
-# Use host IP instead
-ip addr show docker0
+# Check both containers are on same network
+docker network inspect postgres_network
 
-# Update .env with Docker bridge IP (usually 172.17.0.1)
-DB_HOST=172.17.0.1
-DB_PORT=5433
+# Should show both 'postgres' and 'autoapply_web' containers
 ```
 
 ## Database Backup
