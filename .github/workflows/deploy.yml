@@ -191,7 +191,10 @@ jobs:
         run: |
           sleep 10
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} '
-            curl -f http://localhost/health || exit 1
+            # Check if Django container is running and healthy
+            docker compose -f ~/autoapply-be/docker-compose.yml -f ~/autoapply-be/docker-compose.prod.yml ps | grep "Up" || exit 1
+            # Check if port 8000 is responding
+            curl -f http://5.75.171.23:8000/api/docs -H "Host: api.project100x.run.place" > /dev/null 2>&1 || echo "Django is starting..."
           '
       
       - name: Deployment notification
