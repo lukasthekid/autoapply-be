@@ -8,7 +8,7 @@ echo "⏪ Rolling back deployment..."
 
 # Configuration
 PROJECT_DIR="$HOME/autoapply-be"
-DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.yml -f docker-compose.prod.yml"
+DOCKER_COMPOSE_CMD="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -35,7 +35,7 @@ if [ -z "$IMAGE_TAG" ]; then
     exit 1
 fi
 
-# Update docker-compose to use specific tag
+# Update Docker Compose to use specific tag
 echo -e "${YELLOW}🔄 Updating configuration to use tag: $IMAGE_TAG${NC}"
 export IMAGE_TAG=$IMAGE_TAG
 

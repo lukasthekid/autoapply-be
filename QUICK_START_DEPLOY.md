@@ -67,8 +67,8 @@ Same as Option 1, Step 1
 cd "C:\Users\lukb9\Desktop\Dev Projects\autoapply-be"
 
 # Copy deployment files
-scp -i C:\Users\lukb9\.ssh\id_ed25519 docker-compose.yml lukas@5.75.171.23:~/autoapply-be/
-scp -i C:\Users\lukb9\.ssh\id_ed25519 docker-compose.prod.yml lukas@5.75.171.23:~/autoapply-be/
+scp -i C:\Users\lukb9\.ssh\id_ed25519 docker compose.yml lukas@5.75.171.23:~/autoapply-be/
+scp -i C:\Users\lukb9\.ssh\id_ed25519 docker compose.prod.yml lukas@5.75.171.23:~/autoapply-be/
 scp -i C:\Users\lukb9\.ssh\id_ed25519 -r nginx lukas@5.75.171.23:~/autoapply-be/
 scp -i C:\Users\lukb9\.ssh\id_ed25519 env.production.template lukas@5.75.171.23:~/autoapply-be/.env
 scp -i C:\Users\lukb9\.ssh\id_ed25519 -r scripts lukas@5.75.171.23:~/autoapply-be/
@@ -92,15 +92,15 @@ Edit these values:
 
 ```bash
 cd ~/autoapply-be
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+docker compose -f docker compose.yml -f docker compose.prod.yml up -d --build
 ```
 
 ### Step 5: Run Migrations
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py migrate
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py createsuperuser
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py migrate
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py collectstatic --noinput
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py createsuperuser
 ```
 
 ---
@@ -129,17 +129,17 @@ curl http://5.75.171.23/api/docs
 ```bash
 ssh -i C:\Users\lukb9\.ssh\id_ed25519 lukas@5.75.171.23
 cd ~/autoapply-be
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f
+docker compose -f docker compose.yml -f docker compose.prod.yml logs -f
 ```
 
 ### Restart services:
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart
+docker compose -f docker compose.yml -f docker compose.prod.yml restart
 ```
 
 ### Stop services:
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
+docker compose -f docker compose.yml -f docker compose.prod.yml down
 ```
 
 ### Update deployment (manual):
@@ -159,7 +159,7 @@ ssh -i C:\Users\lukb9\.ssh\id_ed25519 lukas@5.75.171.23
 
 ### Services not starting?
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs web
+docker compose -f docker compose.yml -f docker compose.prod.yml logs web
 # Check for error messages
 ```
 
@@ -173,7 +173,7 @@ sudo ufw allow 80/tcp
 ### Database connection issues?
 ```bash
 # Check database is running
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps db
+docker compose -f docker compose.yml -f docker compose.prod.yml ps db
 # Check .env file has correct DB_PASSWORD
 ```
 

@@ -7,10 +7,10 @@ Quick reference for common Docker and Docker Compose commands for this project.
 Add to your `~/.bashrc` or `~/.zshrc`:
 
 ```bash
-alias dc='docker-compose -f docker-compose.yml -f docker-compose.prod.yml'
-alias dclogs='docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f'
-alias dcps='docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps'
-alias dcrestart='docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart'
+alias dc='docker compose -f docker compose.yml -f docker compose.prod.yml'
+alias dclogs='docker compose -f docker compose.yml -f docker compose.prod.yml logs -f'
+alias dcps='docker compose -f docker compose.yml -f docker compose.prod.yml ps'
+alias dcrestart='docker compose -f docker compose.yml -f docker compose.prod.yml restart'
 ```
 
 Then use: `dc up -d`, `dclogs`, etc.
@@ -21,28 +21,28 @@ Then use: `dc up -d`, `dclogs`, etc.
 
 ### Start Services
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+docker compose -f docker compose.yml -f docker compose.prod.yml up -d
 ```
 
 ### Stop Services
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
+docker compose -f docker compose.yml -f docker compose.prod.yml down
 ```
 
 ### Restart Services
 ```bash
 # All services
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart
+docker compose -f docker compose.yml -f docker compose.prod.yml restart
 
 # Specific service
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart web
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart db
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart nginx
+docker compose -f docker compose.yml -f docker compose.prod.yml restart web
+docker compose -f docker compose.yml -f docker compose.prod.yml restart db
+docker compose -f docker compose.yml -f docker compose.prod.yml restart nginx
 ```
 
 ### View Service Status
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps
+docker compose -f docker compose.yml -f docker compose.prod.yml ps
 ```
 
 ---
@@ -51,24 +51,24 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps
 
 ### View All Logs (Follow Mode)
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f
+docker compose -f docker compose.yml -f docker compose.prod.yml logs -f
 ```
 
 ### View Specific Service Logs
 ```bash
 # Web application
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f web
+docker compose -f docker compose.yml -f docker compose.prod.yml logs -f web
 
 # Database
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f db
+docker compose -f docker compose.yml -f docker compose.prod.yml logs -f db
 
 # Nginx
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f nginx
+docker compose -f docker compose.yml -f docker compose.prod.yml logs -f nginx
 ```
 
 ### View Last N Lines
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs --tail=100 web
+docker compose -f docker compose.yml -f docker compose.prod.yml logs --tail=100 web
 ```
 
 ---
@@ -77,32 +77,32 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs --tail=100 
 
 ### Run Migrations
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py migrate
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py migrate
 ```
 
 ### Create Superuser
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py createsuperuser
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py createsuperuser
 ```
 
 ### Collect Static Files
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py collectstatic --noinput
 ```
 
 ### Django Shell
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py shell
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py shell
 ```
 
 ### Create App
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py startapp myapp
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py startapp myapp
 ```
 
 ### Make Migrations
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py makemigrations
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py makemigrations
 ```
 
 ---
@@ -111,7 +111,7 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python 
 
 ### Access PostgreSQL Shell
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec db psql -U postgres -d autoapply
+docker compose -f docker compose.yml -f docker compose.prod.yml exec db psql -U postgres -d autoapply
 ```
 
 ### Common PostgreSQL Commands (once in shell)
@@ -132,26 +132,26 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec db psql -U 
 ### Backup Database
 ```bash
 # Create backup
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec db pg_dump -U postgres autoapply > backup_$(date +%Y%m%d_%H%M%S).sql
+docker compose -f docker compose.yml -f docker compose.prod.yml exec db pg_dump -U postgres autoapply > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Or with compression
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec db pg_dump -U postgres autoapply | gzip > backup_$(date +%Y%m%d_%H%M%S).sql.gz
+docker compose -f docker compose.yml -f docker compose.prod.yml exec db pg_dump -U postgres autoapply | gzip > backup_$(date +%Y%m%d_%H%M%S).sql.gz
 ```
 
 ### Restore Database
 ```bash
 # From SQL file
-cat backup.sql | docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec -T db psql -U postgres autoapply
+cat backup.sql | docker compose -f docker compose.yml -f docker compose.prod.yml exec -T db psql -U postgres autoapply
 
 # From compressed file
-gunzip -c backup.sql.gz | docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec -T db psql -U postgres autoapply
+gunzip -c backup.sql.gz | docker compose -f docker compose.yml -f docker compose.prod.yml exec -T db psql -U postgres autoapply
 ```
 
 ### Reset Database (DANGER!)
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec db psql -U postgres -c "DROP DATABASE autoapply;"
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec db psql -U postgres -c "CREATE DATABASE autoapply;"
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py migrate
+docker compose -f docker compose.yml -f docker compose.prod.yml exec db psql -U postgres -c "DROP DATABASE autoapply;"
+docker compose -f docker compose.yml -f docker compose.prod.yml exec db psql -U postgres -c "CREATE DATABASE autoapply;"
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py migrate
 ```
 
 ---
@@ -160,17 +160,17 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python 
 
 ### Pull Latest Images
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
+docker compose -f docker compose.yml -f docker compose.prod.yml pull
 ```
 
 ### Rebuild Images
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
+docker compose -f docker compose.yml -f docker compose.prod.yml build --no-cache
 ```
 
 ### Build and Start
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+docker compose -f docker compose.yml -f docker compose.prod.yml up -d --build
 ```
 
 ### List Images
@@ -196,12 +196,12 @@ docker image prune -a --filter "until=24h"
 
 ### Execute Command in Container
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web bash
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web bash
 ```
 
 ### Execute Command Without TTY (for scripts)
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec -T web python manage.py migrate
+docker compose -f docker compose.yml -f docker compose.prod.yml exec -T web python manage.py migrate
 ```
 
 ### Copy Files To/From Container
@@ -240,7 +240,7 @@ docker run --rm -v autoapply-be_postgres_data:/data -v $(pwd):/backup ubuntu tar
 ### Remove Volumes (DANGER!)
 ```bash
 # Remove all stopped containers and unused volumes
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml down -v
+docker compose -f docker compose.yml -f docker compose.prod.yml down -v
 ```
 
 ---
@@ -250,25 +250,25 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml down -v
 ### Service Won't Start
 ```bash
 # Check logs
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs web
+docker compose -f docker compose.yml -f docker compose.prod.yml logs web
 
 # Check service health
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps
+docker compose -f docker compose.yml -f docker compose.prod.yml ps
 
 # Restart service
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart web
+docker compose -f docker compose.yml -f docker compose.prod.yml restart web
 ```
 
 ### Reset Everything (Nuclear Option)
 ```bash
 # Stop all containers
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
+docker compose -f docker compose.yml -f docker compose.prod.yml down
 
 # Remove all containers, networks, volumes, and images
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml down -v --rmi all
+docker compose -f docker compose.yml -f docker compose.prod.yml down -v --rmi all
 
 # Start fresh
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+docker compose -f docker compose.yml -f docker compose.prod.yml up -d --build
 ```
 
 ### Check Container Health
@@ -278,7 +278,7 @@ docker inspect autoapply_web | grep -A 10 Health
 
 ### View Container Environment Variables
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web env
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web env
 ```
 
 ---
@@ -298,10 +298,10 @@ docker network inspect autoapply-be_autoapply_network
 ### Test Connectivity Between Services
 ```bash
 # From web container to db
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web ping db
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web ping db
 
 # Check if port is open
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web nc -zv db 5432
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web nc -zv db 5432
 ```
 
 ---
@@ -358,22 +358,22 @@ docker top autoapply_web
 ### Full Deployment
 ```bash
 cd ~/autoapply-be
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec -T web python manage.py migrate
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput
+docker compose -f docker compose.yml -f docker compose.prod.yml pull
+docker compose -f docker compose.yml -f docker compose.prod.yml up -d
+docker compose -f docker compose.yml -f docker compose.prod.yml exec -T web python manage.py migrate
+docker compose -f docker compose.yml -f docker compose.prod.yml exec -T web python manage.py collectstatic --noinput
 ```
 
 ### Quick Restart
 ```bash
 cd ~/autoapply-be
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart
+docker compose -f docker compose.yml -f docker compose.prod.yml restart
 ```
 
 ### View Status
 ```bash
 cd ~/autoapply-be
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps
+docker compose -f docker compose.yml -f docker compose.prod.yml ps
 curl http://localhost/health
 ```
 
@@ -383,7 +383,7 @@ curl http://localhost/health
 
 ### Check Current Values
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml config
+docker compose -f docker compose.yml -f docker compose.prod.yml config
 ```
 
 ### Update Environment Variables
@@ -392,7 +392,7 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml config
 nano .env
 
 # Restart services to apply changes
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --force-recreate
+docker compose -f docker compose.yml -f docker compose.prod.yml up -d --force-recreate
 ```
 
 ---
@@ -401,7 +401,7 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --force-re
 
 ```bash
 #!/bin/bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml "$@"
+docker compose -f docker compose.yml -f docker compose.prod.yml "$@"
 ```
 
 Make it executable:

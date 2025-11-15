@@ -79,6 +79,14 @@ else
     echo -e "${RED}✗${NC} gunicorn not in requirements.txt"
     ((ERRORS++))
 fi
+
+# Check Docker Compose files use V2 syntax (docker compose)
+if grep -q "docker compose" docker-compose.prod.yml; then
+    echo -e "${GREEN}✓${NC} Docker Compose V2 syntax (docker compose)"
+else
+    echo -e "${YELLOW}⚠${NC}  Using old Docker Compose V1 syntax (docker-compose)"
+    ((WARNINGS++))
+fi
 echo ""
 
 # Optional checks

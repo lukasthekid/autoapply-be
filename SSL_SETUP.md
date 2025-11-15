@@ -43,7 +43,7 @@ sudo apt-get install certbot -y
 
 ```bash
 cd ~/autoapply-be
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml stop nginx
+docker compose -f docker compose.yml -f docker compose.prod.yml stop nginx
 ```
 
 ## Step 4: Get SSL Certificate
@@ -112,10 +112,10 @@ server {
 ## Step 7: Restart Nginx
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml start nginx
+docker compose -f docker compose.yml -f docker compose.prod.yml start nginx
 
 # Or restart all services
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart
+docker compose -f docker compose.yml -f docker compose.prod.yml restart
 ```
 
 ## Step 8: Test HTTPS
@@ -139,7 +139,7 @@ sudo certbot renew --dry-run
 sudo crontab -e
 
 # Add this line (runs daily at 2am):
-0 2 * * * certbot renew --quiet --deploy-hook "cd /home/lukas/autoapply-be && docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart nginx"
+0 2 * * * certbot renew --quiet --deploy-hook "cd /home/lukas/autoapply-be && docker compose -f docker compose.yml -f docker compose.prod.yml restart nginx"
 ```
 
 ## Step 10: Update Django Settings (if needed)
@@ -147,7 +147,7 @@ sudo crontab -e
 If you want to enforce HTTPS in Django:
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web nano ~/autoapply-be/.env
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web nano ~/autoapply-be/.env
 ```
 
 Add these settings to your `.env`:
@@ -164,7 +164,7 @@ SECURE_HSTS_PRELOAD=True
 Then restart the web container:
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart web
+docker compose -f docker compose.yml -f docker compose.prod.yml restart web
 ```
 
 ## Verification Checklist
@@ -210,7 +210,7 @@ sudo certbot certificates
 nslookup api.project100x.run.place
 
 # Check nginx logs
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs nginx
+docker compose -f docker compose.yml -f docker compose.prod.yml logs nginx
 ```
 
 ### HTTP Still Works (Not Redirecting)
@@ -244,10 +244,10 @@ sudo certbot renew
 sudo certbot renew --dry-run
 
 # View nginx logs
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs nginx
+docker compose -f docker compose.yml -f docker compose.prod.yml logs nginx
 
 # Restart nginx
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart nginx
+docker compose -f docker compose.yml -f docker compose.prod.yml restart nginx
 ```
 
 ---

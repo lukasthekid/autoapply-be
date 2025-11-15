@@ -61,7 +61,7 @@ After running the script, **log out and log back in** for Docker group membershi
 
 ```bash
 docker --version
-docker-compose --version
+docker compose --version
 docker ps  # Should work without sudo
 ```
 
@@ -134,8 +134,8 @@ cd "C:\Users\lukb9\Desktop\Dev Projects\autoapply-be"
 Or manually:
 
 ```powershell
-scp -i C:\Users\lukb9\.ssh\id_ed25519 docker-compose.yml lukas@5.75.171.23:~/autoapply-be/
-scp -i C:\Users\lukb9\.ssh\id_ed25519 docker-compose.prod.yml lukas@5.75.171.23:~/autoapply-be/
+scp -i C:\Users\lukb9\.ssh\id_ed25519 docker compose.yml lukas@5.75.171.23:~/autoapply-be/
+scp -i C:\Users\lukb9\.ssh\id_ed25519 docker compose.prod.yml lukas@5.75.171.23:~/autoapply-be/
 scp -i C:\Users\lukb9\.ssh\id_ed25519 -r nginx lukas@5.75.171.23:~/autoapply-be/
 scp -i C:\Users\lukb9\.ssh\id_ed25519 env.production.template lukas@5.75.171.23:~/autoapply-be/.env
 ```
@@ -156,20 +156,20 @@ Fill in all the required values from `env.production.template`.
 
 ```bash
 cd ~/autoapply-be
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+docker compose -f docker compose.yml -f docker compose.prod.yml up -d --build
 ```
 
 ### Step 4: Run Migrations
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py migrate
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py migrate
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py collectstatic --noinput
 ```
 
 ### Step 5: Create Superuser (Optional)
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py createsuperuser
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py createsuperuser
 ```
 
 ### Step 6: Verify Deployment
@@ -244,7 +244,7 @@ Edit `nginx/conf.d/autoapply.conf` and uncomment the HTTPS server block, replaci
 
 ```bash
 cd ~/autoapply-be
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart nginx
+docker compose -f docker compose.yml -f docker compose.prod.yml restart nginx
 ```
 
 5. **Set up auto-renewal**:
@@ -252,7 +252,7 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart nginx
 ```bash
 sudo crontab -e
 # Add this line:
-0 12 * * * /usr/bin/certbot renew --quiet && cd ~/autoapply-be && docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart nginx
+0 12 * * * /usr/bin/certbot renew --quiet && cd ~/autoapply-be && docker compose -f docker compose.yml -f docker compose.prod.yml restart nginx
 ```
 
 ---
@@ -263,18 +263,18 @@ sudo crontab -e
 
 ```bash
 # All services
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f
+docker compose -f docker compose.yml -f docker compose.prod.yml logs -f
 
 # Specific service
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f web
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f db
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f nginx
+docker compose -f docker compose.yml -f docker compose.prod.yml logs -f web
+docker compose -f docker compose.yml -f docker compose.prod.yml logs -f db
+docker compose -f docker compose.yml -f docker compose.prod.yml logs -f nginx
 ```
 
 ### Check Service Status
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps
+docker compose -f docker compose.yml -f docker compose.prod.yml ps
 ```
 
 ### Check Resource Usage
@@ -287,10 +287,10 @@ docker stats
 
 ```bash
 # Backup
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec db pg_dump -U postgres autoapply > backup_$(date +%Y%m%d_%H%M%S).sql
+docker compose -f docker compose.yml -f docker compose.prod.yml exec db pg_dump -U postgres autoapply > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Restore
-cat backup_file.sql | docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec -T db psql -U postgres autoapply
+cat backup_file.sql | docker compose -f docker compose.yml -f docker compose.prod.yml exec -T db psql -U postgres autoapply
 ```
 
 ### Update Application
@@ -319,7 +319,7 @@ bash scripts/rollback.sh
 
 **Check logs**:
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs web
+docker compose -f docker compose.yml -f docker compose.prod.yml logs web
 ```
 
 **Common issues**:
@@ -331,10 +331,10 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs web
 
 ```bash
 # Check if database is running
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps db
+docker compose -f docker compose.yml -f docker compose.prod.yml ps db
 
 # Test database connection
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec db psql -U postgres -d autoapply -c "SELECT 1;"
+docker compose -f docker compose.yml -f docker compose.prod.yml exec db psql -U postgres -d autoapply -c "SELECT 1;"
 ```
 
 ### Cannot Access from Internet
@@ -348,7 +348,7 @@ sudo ufw allow 443/tcp
 
 **Check nginx**:
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs nginx
+docker compose -f docker compose.yml -f docker compose.prod.yml logs nginx
 ```
 
 ### CI/CD Deployment Failed
@@ -362,7 +362,7 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs nginx
 
 **Restart services**:
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart
+docker compose -f docker compose.yml -f docker compose.prod.yml restart
 ```
 
 **Prune old containers and images**:
@@ -373,8 +373,8 @@ docker system prune -a --volumes
 ### Static Files Not Loading
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart nginx
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py collectstatic --noinput
+docker compose -f docker compose.yml -f docker compose.prod.yml restart nginx
 ```
 
 ---
@@ -385,38 +385,38 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart nginx
 
 ```bash
 # Start services
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+docker compose -f docker compose.yml -f docker compose.prod.yml up -d
 
 # Stop services
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
+docker compose -f docker compose.yml -f docker compose.prod.yml down
 
 # Restart services
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart
+docker compose -f docker compose.yml -f docker compose.prod.yml restart
 
 # View logs
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f
+docker compose -f docker compose.yml -f docker compose.prod.yml logs -f
 
 # Execute command in container
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py shell
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py shell
 
 # Rebuild and restart
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+docker compose -f docker compose.yml -f docker compose.prod.yml up -d --build
 ```
 
 ### Django Management Commands
 
 ```bash
 # Run migrations
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py migrate
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py migrate
 
 # Create superuser
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py createsuperuser
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py createsuperuser
 
 # Collect static files
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py collectstatic --noinput
 
 # Django shell
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py shell
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py shell
 ```
 
 ---
@@ -469,7 +469,7 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python 
 If you encounter issues:
 
 1. Check the [Troubleshooting](#troubleshooting) section
-2. Review logs: `docker-compose logs -f`
+2. Review logs: `docker compose logs -f`
 3. Check GitHub Actions workflow logs
 4. Verify all environment variables are set correctly
 

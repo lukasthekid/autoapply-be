@@ -182,8 +182,8 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for comprehensive deployment instructions inc
 ### Files Structure
 ```
 ├── Dockerfile                  # Production Docker image
-├── docker-compose.yml          # Docker services configuration
-├── docker-compose.prod.yml     # Production overrides
+├── docker compose.yml          # Docker services configuration
+├── docker compose.prod.yml     # Production overrides
 ├── nginx/                      # Nginx reverse proxy config
 ├── scripts/
 │   ├── setup-server.sh        # One-time server setup

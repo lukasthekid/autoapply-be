@@ -51,13 +51,13 @@ sudo apt-get install certbot python3-certbot-nginx -y
 
 # Stop nginx temporarily
 cd ~/autoapply-be
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml stop nginx
+docker compose -f docker compose.yml -f docker compose.prod.yml stop nginx
 
 # Get certificate
 sudo certbot certonly --standalone -d api.project100x.run.place
 
 # Start nginx again
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml start nginx
+docker compose -f docker compose.yml -f docker compose.prod.yml start nginx
 ```
 
 ### Step 5: Enable HTTPS in Nginx

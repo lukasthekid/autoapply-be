@@ -6,8 +6,8 @@ Your Django Ninja project is now ready for production deployment with Docker and
 
 ### 1. Docker Configuration
 - ✅ **Dockerfile** - Multi-stage production-ready Docker image
-- ✅ **docker-compose.yml** - Complete stack with Django, PostgreSQL, and Nginx
-- ✅ **docker-compose.prod.yml** - Production-specific overrides
+- ✅ **docker compose.yml** - Complete stack with Django, PostgreSQL, and Nginx
+- ✅ **docker compose.prod.yml** - Production-specific overrides
 - ✅ **.dockerignore** - Optimized Docker build context
 
 ### 2. Nginx Reverse Proxy
@@ -93,7 +93,7 @@ cd "C:\Users\lukb9\Desktop\Dev Projects\autoapply-be"
 ssh -i C:\Users\lukb9\.ssh\id_ed25519 lukas@5.75.171.23
 cd ~/autoapply-be
 nano .env  # Fill in values from env.production.template
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+docker compose -f docker compose.yml -f docker compose.prod.yml up -d --build
 ```
 
 ---
@@ -194,7 +194,7 @@ sudo ufw allow 80/tcp
 cat ~/autoapply-be/.env
 
 # Check database is running
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps db
+docker compose -f docker compose.yml -f docker compose.prod.yml ps db
 ```
 
 ---
@@ -205,22 +205,22 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps db
 ```bash
 ssh -i C:\Users\lukb9\.ssh\id_ed25519 lukas@5.75.171.23
 cd ~/autoapply-be
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f
+docker compose -f docker compose.yml -f docker compose.prod.yml logs -f
 ```
 
 ### Restart Services
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart
+docker compose -f docker compose.yml -f docker compose.prod.yml restart
 ```
 
 ### Run Migrations
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py migrate
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py migrate
 ```
 
 ### Create Superuser
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py createsuperuser
+docker compose -f docker compose.yml -f docker compose.prod.yml exec web python manage.py createsuperuser
 ```
 
 See [DOCKER_CHEATSHEET.md](DOCKER_CHEATSHEET.md) for more commands.
@@ -240,7 +240,7 @@ See [DOCKER_CHEATSHEET.md](DOCKER_CHEATSHEET.md) for more commands.
 # View logs
 ssh -i C:\Users\lukb9\.ssh\id_ed25519 lukas@5.75.171.23
 cd ~/autoapply-be
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f
+docker compose -f docker compose.yml -f docker compose.prod.yml logs -f
 
 # Rollback if needed
 bash scripts/rollback.sh

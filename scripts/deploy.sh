@@ -8,7 +8,7 @@ echo "🚀 Starting deployment..."
 
 # Configuration
 PROJECT_DIR="$HOME/autoapply-be"
-DOCKER_COMPOSE_CMD="docker-compose -f docker-compose.yml -f docker-compose.prod.yml"
+DOCKER_COMPOSE_CMD="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -29,8 +29,9 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null; then
+if ! docker compose version &> /dev/null; then
     echo -e "${RED}❌ Docker Compose is not installed. Please install Docker Compose first.${NC}"
+    echo -e "${YELLOW}Install with: sudo apt-get install docker-compose-plugin${NC}"
     exit 1
 fi
 

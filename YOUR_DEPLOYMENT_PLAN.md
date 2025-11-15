@@ -27,33 +27,52 @@
 
 ### Phase 2: Server Setup (One-Time) ⏱️ 10 minutes
 
+**Docker is already installed ✅**
+
+Now let's install Docker Compose and set up the environment:
+
 ```bash
+# SSH to your server
+ssh -i C:\Users\lukb9\.ssh\id_ed25519 lukas@5.75.171.23
 
+# Update system
 sudo apt-get update
-
 sudo apt-get upgrade -y
 
-sudo apt-get install -y \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    gnupg \
-    lsb-release \
-    git \
-    ufw
+# Verify Docker Compose V2 is installed (comes with modern Docker)
+docker compose version
 
-sudo ufw allow 5433/tcp  # PostgreSQL (if you want external access)
+# If not available, install Docker Compose plugin
+# sudo apt-get update
+# sudo apt-get install docker-compose-plugin
 
+# Install other required packages
+sudo apt-get install -y curl git ufw
+
+# Configure firewall
+sudo ufw --force enable
+sudo ufw allow 22/tcp    # SSH
+sudo ufw allow 80/tcp    # HTTP
+sudo ufw allow 443/tcp   # HTTPS
+sudo ufw allow 5433/tcp  # PostgreSQL (optional, if you want external access)
+
+# Create project directories
 mkdir -p ~/autoapply-be/certbot/conf
 mkdir -p ~/autoapply-be/certbot/www
 
-# Verify Docker works without sudo
+# Verify Docker works without sudo (if not, you may need to add user to docker group)
 docker ps
+
+# If docker ps fails, add your user to docker group:
+# sudo usermod -aG docker $USER
+# Then log out and log back in
 ```
+
+**⚠️ Important**: If you had to add your user to the docker group, log out and log back in before continuing!
 
 ---
 
-### Phase 2: GitHub Secrets Configuration ⏱️ 5 minutes
+### Phase 3: GitHub Secrets Configuration ⏱️ 5 minutes
 
 Go to: `https://github.com/<your-username>/autoapply-be/settings/secrets/actions`
 
@@ -84,8 +103,6 @@ Get-Content C:\Users\lukb9\.ssh\id_ed25519 | Set-Clipboard
 
 ```bash
 # In your project directory
-cd "C:\Users\lukb9\Desktop\Dev Projects\autoapply-be"
-
 # Commit all deployment files
 git add .
 git commit -m "Add Docker deployment with CI/CD for project100x.run.place"
@@ -138,7 +155,7 @@ sudo apt-get install certbot -y
 
 # Stop nginx temporarily
 cd ~/autoapply-be
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml stop nginx
+docker compose -f docker-compose.yml -f docker-compose.prod.yml stop nginx
 
 # Get SSL certificate
 sudo certbot certonly --standalone \
@@ -165,7 +182,7 @@ nano ~/autoapply-be/nginx/conf.d/autoapply.conf
 
 ```bash
 # Restart services
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 # Test HTTPS
 curl https://api.project100x.run.place/health
@@ -176,7 +193,7 @@ curl https://api.project100x.run.place/health
 ```bash
 sudo crontab -e
 # Add this line:
-0 2 * * * certbot renew --quiet --deploy-hook "cd /home/lukas/autoapply-be && docker-compose -f docker-compose.yml -f docker-compose.prod.yml restart nginx"
+0 2 * * * certbot renew --quiet --deploy-hook "cd /home/lukas/autoapply-be && docker compose -f docker-compose.yml -f docker-compose.prod.yml restart nginx"
 ```
 
 ---
@@ -292,7 +309,7 @@ docker ps
 
 # Check logs
 cd ~/autoapply-be
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f
 ```
 
 ### SSL certificate issues
@@ -305,7 +322,7 @@ sudo certbot certificates
 sudo certbot renew --force-renewal
 
 # Check nginx config
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs nginx
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs nginx
 ```
 
 ### CORS errors in frontend

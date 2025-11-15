@@ -28,7 +28,7 @@ Write-Host "✅ SSH connection successful" -ForegroundColor Green
 Write-Host "📁 Creating project directory on server..." -ForegroundColor Yellow
 ssh -i $SSHKey "${SSHUser}@${ServerIP}" "mkdir -p ~/autoapply-be"
 
-# Copy docker-compose files
+# Copy Docker Compose files
 Write-Host "📦 Copying deployment files to server..." -ForegroundColor Yellow
 scp -i $SSHKey docker-compose.yml "${SSHUser}@${ServerIP}:~/autoapply-be/"
 scp -i $SSHKey docker-compose.prod.yml "${SSHUser}@${ServerIP}:~/autoapply-be/"
@@ -41,5 +41,5 @@ Write-Host "Next steps:" -ForegroundColor Yellow
 Write-Host "1. SSH to your server: ssh -i $SSHKey ${SSHUser}@${ServerIP}"
 Write-Host "2. Edit the .env file: cd ~/autoapply-be && nano .env.production"
 Write-Host "3. Rename .env.production to .env: mv .env.production .env"
-Write-Host "4. Run the deployment: bash scripts/deploy.sh"
+Write-Host "4. Run the deployment: bash scripts/deploy.sh (uses 'docker compose' V2)"
 

@@ -49,14 +49,15 @@ else
     echo -e "${GREEN}✅ Docker is already installed${NC}"
 fi
 
-# Install Docker Compose
-echo -e "${YELLOW}🐳 Installing Docker Compose...${NC}"
-if ! command -v docker-compose &> /dev/null; then
-    sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    sudo chmod +x /usr/local/bin/docker-compose
-    echo -e "${GREEN}✅ Docker Compose installed successfully${NC}"
+# Check Docker Compose
+echo -e "${YELLOW}🐳 Checking Docker Compose...${NC}"
+if docker compose version &> /dev/null; then
+    echo -e "${GREEN}✅ Docker Compose (V2) is already installed${NC}"
 else
-    echo -e "${GREEN}✅ Docker Compose is already installed${NC}"
+    echo -e "${YELLOW}Installing Docker Compose plugin...${NC}"
+    sudo apt-get update
+    sudo apt-get install -y docker-compose-plugin
+    echo -e "${GREEN}✅ Docker Compose plugin installed successfully${NC}"
 fi
 
 # Configure firewall
@@ -82,7 +83,7 @@ echo -e "${GREEN}✅ SSL directories created${NC}"
 # Display Docker version
 echo -e "${YELLOW}📋 Installed versions:${NC}"
 docker --version
-docker-compose --version
+docker compose version
 
 echo -e "${GREEN}✅ Server setup completed!${NC}"
 echo ""
@@ -90,7 +91,7 @@ echo -e "${YELLOW}Next steps:${NC}"
 echo "1. Log out and log back in (or run: newgrp docker)"
 echo "2. Clone or upload your project to ~/autoapply-be"
 echo "3. Create .env file from .env.production template"
-echo "4. Run: cd ~/autoapply-be && docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d"
+echo "4. Run: cd ~/autoapply-be && docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d"
 echo ""
 echo -e "${YELLOW}For CI/CD deployment:${NC}"
 echo "1. Add GitHub secrets in your repository settings"

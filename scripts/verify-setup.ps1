@@ -72,6 +72,14 @@ if (Select-String -Path "requirements.txt" -Pattern "gunicorn" -Quiet) {
     Write-Host "✗ gunicorn not in requirements.txt" -ForegroundColor Red
     $Errors++
 }
+
+# Check Docker Compose files use V2 syntax (docker compose)
+if (Select-String -Path "docker-compose.prod.yml" -Pattern "docker compose" -Quiet) {
+    Write-Host "✓ Docker Compose V2 syntax (docker compose)" -ForegroundColor Green
+} else {
+    Write-Host "⚠  Using old Docker Compose V1 syntax (docker-compose)" -ForegroundColor Yellow
+    $Warnings++
+}
 Write-Host ""
 
 # Optional checks
