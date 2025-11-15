@@ -36,7 +36,7 @@ Add these secrets:
 | `SSH_USER` | `lukas` |
 | `SSH_PRIVATE_KEY` | Full contents of your SSH private key |
 | `SECRET_KEY` | Generate: `python -c "import secrets; print(secrets.token_urlsafe(50))"` |
-| `ALLOWED_HOSTS` | `api.project100x.run.place,5.75.171.23` |
+| `ALLOWED_HOSTS` | `api.project100x.run.place,project100x.run.place,5.75.171.23` |
 | `CORS_ALLOWED_ORIGINS` | `https://project100x.run.place` |
 | `DB_NAME` | `autoapply` |
 | `DB_USER` | `admin` (your PostgreSQL user) |
