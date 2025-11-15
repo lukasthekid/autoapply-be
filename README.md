@@ -151,3 +151,46 @@ The SSH tunnel is required for local development to access the remote PostgreSQL
 1. Keep the tunnel running while developing
 2. Use the correct SSH key with proper permissions (chmod 600 on Linux/Mac)
 3. The tunnel forwards local port 5433 to the remote database port 5433
+
+## Production Deployment
+
+This project includes complete Docker deployment with CI/CD pipeline.
+
+### Quick Start
+See [QUICK_START_DEPLOY.md](QUICK_START_DEPLOY.md) for a 5-minute deployment guide.
+
+### Full Documentation
+See [DEPLOYMENT.md](DEPLOYMENT.md) for comprehensive deployment instructions including:
+- Server setup with Docker
+- GitHub Actions CI/CD configuration
+- SSL/HTTPS setup
+- Monitoring and maintenance
+- Troubleshooting guide
+
+### Deployment Options
+
+**Option 1: Automatic CI/CD (Recommended)**
+- Push to main/master branch
+- GitHub Actions automatically deploys to server
+- No manual intervention needed
+
+**Option 2: Manual Deployment**
+- Use provided deployment scripts
+- Full control over deployment process
+- Useful for testing and debugging
+
+### Files Structure
+```
+├── Dockerfile                  # Production Docker image
+├── docker-compose.yml          # Docker services configuration
+├── docker-compose.prod.yml     # Production overrides
+├── nginx/                      # Nginx reverse proxy config
+├── scripts/
+│   ├── setup-server.sh        # One-time server setup
+│   ├── deploy.sh              # Deployment script
+│   ├── rollback.sh            # Rollback script
+│   └── local-deploy-test.ps1  # Test deployment from Windows
+├── .github/workflows/
+│   └── deploy.yml             # CI/CD pipeline
+└── env.production.template    # Production environment template
+```
