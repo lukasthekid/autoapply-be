@@ -3,13 +3,10 @@
 
 services:
   web:
-    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/${GITHUB_REPOSITORY_NAME}:latest
+    image: ghcr.io/lukasthekid/autoapply-be:latest
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - BUILD_DATE=${BUILD_DATE}
-        - VCS_REF=${VCS_REF}
     environment:
       - DEBUG=False
     logging:
