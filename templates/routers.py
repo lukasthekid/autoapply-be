@@ -74,17 +74,21 @@ def create_cover_letter(request, payload: CreateCoverLetterRequest):
     Create a cover letter using a template, user profile, and job listing.
     
     This endpoint:
-    1. Fetches the user, template, and job from the database
-    2. Sends the job and user data to an n8n webhook to generate content
-    3. Replaces dynamic content in the template using Jinja2
-    4. Returns the rendered result
+    1. Fetches the authenticated user from JWT token
+    2. Fetches the template and job from the database
+    3. Sends the job and user data to an n8n webhook to generate content
+    4. Replaces dynamic content in the template using Jinja2
+    5. Returns the rendered result
     
     Requires a valid JWT token in the Authorization header.
     """
     
-    # Fetch user
+    # Get authenticated user from JWT token
+    user = request.user
+    
+    # Ensure user profile exists
     try:
-        user = User.objects.select_related('profile').get(id=payload.user_id)
+        user = User.objects.select_related('profile').get(id=user.id)
     except User.DoesNotExist:
         raise HttpError(404, "User not found")
     

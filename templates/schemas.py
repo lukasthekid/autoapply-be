@@ -36,7 +36,6 @@ class TypstTemplateListResponse(Schema):
 class CreateCoverLetterRequest(Schema):
     """Schema for create cover letter request."""
     
-    user_id: int
     template_id: int
     job_id: str
     language: CoverLetterLanguage = CoverLetterLanguage.ENGLISH
