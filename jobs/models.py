@@ -28,6 +28,9 @@ class JobListing(models.Model):
     search_keyword = models.CharField(max_length=255, blank=True, null=True)
     search_location = models.CharField(max_length=255, blank=True, null=True)
     
+    # Enrichment status
+    is_enriched = models.BooleanField(default=False, db_index=True)
+    
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

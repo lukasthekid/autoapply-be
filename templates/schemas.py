@@ -42,6 +42,18 @@ class CreateCoverLetterRequest(Schema):
     customer_instructions: str = None
 
 
+class CreateCoverLetterSimpleRequest(Schema):
+    """Schema for simple cover letter request without requiring a stored job listing."""
+    
+    template_id: int
+    position_title: str
+    company_name: str
+    job_location: str
+    job_description: str
+    language: CoverLetterLanguage = CoverLetterLanguage.ENGLISH
+    customer_instructions: str = None
+
+
 class CreateCoverLetterResponse(Schema):
     """Schema for create cover letter response."""
     

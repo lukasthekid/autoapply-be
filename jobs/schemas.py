@@ -66,6 +66,7 @@ class JobListingSchema(Schema):
     posted_date: Optional[datetime] = None
     applicants_count: Optional[int] = None
     company_logo_url: Optional[str] = None
+    is_enriched: bool = False
     
     class Config:
         schema_extra = {

@@ -335,7 +335,8 @@ class LinkedInJobScraper:
             if not desc_elem:
                 desc_elem = soup.find('div', class_='description__text')
             if desc_elem:
-                job_details['description'] = desc_elem.get_text(strip=True)
+                # Preserve line breaks and spacing for better readability
+                job_details['description'] = desc_elem.get_text(separator='\n', strip=False).strip()
             
             # Extract employment type and seniority level
             criteria_items = soup.find_all('li', class_='description__job-criteria-item')

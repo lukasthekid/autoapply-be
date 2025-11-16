@@ -113,6 +113,7 @@ def search_jobs(request, payload: JobSearchRequest):
                 posted_date=job.posted_date,
                 applicants_count=job.applicants_count,
                 company_logo_url=job.company_logo_url,
+                is_enriched=job.is_enriched,
             ))
         
         # Build response
@@ -194,6 +195,7 @@ def get_job_listings(
                 posted_date=job.posted_date,
                 applicants_count=job.applicants_count,
                 company_logo_url=job.company_logo_url,
+                is_enriched=job.is_enriched,
             ))
         
         return job_schemas
@@ -229,6 +231,7 @@ def get_job_by_id(request, job_id: str):
             posted_date=job.posted_date,
             applicants_count=job.applicants_count,
             company_logo_url=job.company_logo_url,
+            is_enriched=job.is_enriched,
         )
         
     except JobListing.DoesNotExist:
@@ -339,6 +342,7 @@ def create_job_from_url(request, payload: CreateJobFromUrlRequest):
                 posted_date=existing_job.posted_date,
                 applicants_count=existing_job.applicants_count,
                 company_logo_url=existing_job.company_logo_url,
+                is_enriched=existing_job.is_enriched,
             )
         
         # Fetch job details from LinkedIn
@@ -390,6 +394,7 @@ def create_job_from_url(request, payload: CreateJobFromUrlRequest):
             posted_date=job_listing.posted_date,
             applicants_count=job_listing.applicants_count,
             company_logo_url=job_listing.company_logo_url,
+            is_enriched=job_listing.is_enriched,
         )
         
     except Exception as e:
@@ -429,6 +434,24 @@ def enrich_job_details(request, job_id: str):
                 success=False,
                 error="Job not found",
                 details=f"Job with ID {job_id} not found in database. Please search for jobs first."
+            )
+        
+        # Check if job has already been enriched
+        if job_listing.is_enriched:
+            logger.info(f"Job {job_id} has already been enriched. Returning cached data.")
+            return 200, JobListingSchema(
+                job_id=job_listing.job_id,
+                linkedin_url=job_listing.linkedin_url,
+                title=job_listing.title,
+                company_name=job_listing.company_name,
+                location=job_listing.location,
+                description=job_listing.description,
+                employment_type=job_listing.employment_type,
+                experience_level=job_listing.experience_level,
+                posted_date=job_listing.posted_date,
+                applicants_count=job_listing.applicants_count,
+                company_logo_url=job_listing.company_logo_url,
+                is_enriched=job_listing.is_enriched,
             )
         
         # Fetch detailed information from LinkedIn
@@ -477,6 +500,10 @@ def enrich_job_details(request, job_id: str):
             job_listing.company_logo_url = job_details['company_logo_url']
             updated_fields.append('company_logo_url')
         
+        # Mark job as enriched
+        job_listing.is_enriched = True
+        updated_fields.append('is_enriched')
+        
         # Save the updated job listing
         job_listing.save()
         
@@ -495,6 +522,7 @@ def enrich_job_details(request, job_id: str):
             posted_date=job_listing.posted_date,
             applicants_count=job_listing.applicants_count,
             company_logo_url=job_listing.company_logo_url,
+            is_enriched=job_listing.is_enriched,
         )
         
     except Exception as e:
