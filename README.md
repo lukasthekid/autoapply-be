@@ -114,6 +114,26 @@ The API will be available at:
 - API Docs: http://127.0.0.1:8000/api/docs
 - Admin: http://127.0.0.1:8000/admin/
 
+## Features
+
+### Job Search
+Search for jobs from LinkedIn with advanced filters:
+- Search by keyword (e.g., "Data Scientist")
+- Filter by location (e.g., "Vienna")
+- Filter by job type (full_time, part_time, contract, temporary, internship)
+- Filter by experience level (internship, entry_level, associate, mid_senior_level, director)
+- Filter by date posted (any_time, past_24_hours, past_week, past_month)
+
+**API Endpoints:**
+- `POST /api/jobs/search` - Search for jobs with filters
+- `GET /api/jobs/listings` - Get stored job listings
+- `GET /api/jobs/listings/{job_id}` - Get specific job details
+- `POST /api/jobs/create-from-url` - Create job listing from LinkedIn URL
+- `POST /api/jobs/enrich/{job_id}` - Fetch full job details from LinkedIn
+- `GET /api/jobs/search-history` - View search history
+
+📖 **See [JOB_SEARCH_GUIDE.md](JOB_SEARCH_GUIDE.md) for complete documentation**
+
 ## Environment Variables
 
 See `.env.example` for all available environment variables.

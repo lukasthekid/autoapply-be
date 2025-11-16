@@ -6,6 +6,7 @@ from django.urls import path
 from ninja import NinjaAPI
 from templates.routers import router as templates_router
 from authentication.routers import router as auth_router
+from jobs.routers import router as jobs_router
 
 # Create Django Ninja API instance
 api = NinjaAPI(
@@ -17,6 +18,7 @@ api = NinjaAPI(
 # Register routers
 api.add_router("/auth", auth_router)
 api.add_router("/templates", templates_router)
+api.add_router("/jobs", jobs_router)
 
 
 @api.get("/")

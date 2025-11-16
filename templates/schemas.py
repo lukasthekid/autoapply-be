@@ -1,5 +1,15 @@
 from ninja import Schema
 from datetime import datetime
+from enum import Enum
+
+
+class CoverLetterLanguage(str, Enum):
+    """Supported languages for cover letters."""
+    ENGLISH = "english"
+    GERMAN = "german"
+    FRENCH = "french"
+    ITALIAN = "italian"
+    SPANISH = "spanish"
 
 
 class TypstTemplateSchema(Schema):
@@ -21,4 +31,22 @@ class TypstTemplateListResponse(Schema):
     
     templates: list[TypstTemplateSchema]
     count: int
+
+
+class CreateCoverLetterRequest(Schema):
+    """Schema for create cover letter request."""
+    
+    user_id: int
+    template_id: int
+    job_id: str
+    language: CoverLetterLanguage = CoverLetterLanguage.ENGLISH
+    customer_instructions: str = None
+
+
+class CreateCoverLetterResponse(Schema):
+    """Schema for create cover letter response."""
+    
+    cover_letter_text: str
+    pdf_base64: str
+    success: bool = True
 
