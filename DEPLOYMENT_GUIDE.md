@@ -41,6 +41,7 @@ Add these secrets:
 | `DB_NAME` | `autoapply` |
 | `DB_USER` | `admin` (your PostgreSQL user) |
 | `DB_PASSWORD` | Your PostgreSQL password |
+| `N8N_WEBHOOK_URL` | Your N8N |
 
 ### 2. Create Database
 

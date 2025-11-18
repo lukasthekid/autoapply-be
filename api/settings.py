@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'templates',
     'authentication',
     'jobs',
+    'documents',
 ]
 
 MIDDLEWARE = [
@@ -152,6 +153,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# File Upload Settings
+# Maximum size (in bytes) for request data - 10 MB
+# This allows for ~7MB base64-encoded content (original ~5MB PDF + encoding overhead + JSON)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
+
+# Maximum size for file uploads kept in memory - 10 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
 
 # CORS Configuration
 # https://pypi.org/project/django-cors-headers/
