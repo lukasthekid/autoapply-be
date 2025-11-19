@@ -6,8 +6,10 @@ from django.urls import path
 from ninja import NinjaAPI
 from django.core.exceptions import RequestDataTooBig
 from templates.routers import router as templates_router
+from templates.cover_letters import router as cover_letters_router
 from authentication.routers import router as auth_router
 from jobs.routers import router as jobs_router
+from jobs.applications import router as applications_router
 from documents.routers import router as documents_router
 from documents.exceptions import handle_request_too_large
 
@@ -30,7 +32,9 @@ def request_too_large_handler(request, exc):
 # Register routers
 api.add_router("/auth", auth_router)
 api.add_router("/templates", templates_router)
+api.add_router("/cover-letters", cover_letters_router)
 api.add_router("/jobs", jobs_router)
+api.add_router("/applications", applications_router)
 api.add_router("/documents", documents_router)
 
 

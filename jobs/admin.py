@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import JobListing, JobSearch
+from .models import JobListing, JobSearch, JobApplication
 
 
 @admin.register(JobListing)
@@ -126,3 +126,70 @@ class JobSearchAdmin(admin.ModelAdmin):
     )
     
     ordering = ['-created_at']
+
+
+@admin.register(JobApplication)
+class JobApplicationAdmin(admin.ModelAdmin):
+    """Admin interface for JobApplication model"""
+    
+    list_display = [
+        'id',
+        'user',
+        'job_title',
+        'company_name',
+        'job_location',
+        'applied_at',
+        'updated_at',
+    ]
+    
+    list_filter = [
+        'applied_at',
+        'company_name',
+        'updated_at',
+    ]
+    
+    search_fields = [
+        'user__username',
+        'user__email',
+        'job_title',
+        'company_name',
+        'job_location',
+        'notes',
+    ]
+    
+    readonly_fields = [
+        'applied_at',
+        'updated_at',
+    ]
+    
+    fieldsets = (
+        ('User Information', {
+            'fields': (
+                'user',
+            )
+        }),
+        ('Job Information', {
+            'fields': (
+                'job_listing',
+                'job_title',
+                'company_name',
+                'job_location',
+                'job_url',
+            )
+        }),
+        ('Application Details', {
+            'fields': (
+                'notes',
+            )
+        }),
+        ('Timestamps', {
+            'fields': (
+                'applied_at',
+                'updated_at',
+            )
+        }),
+    )
+    
+    ordering = ['-applied_at']
+    
+    raw_id_fields = ['user', 'job_listing']

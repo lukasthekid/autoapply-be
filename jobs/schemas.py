@@ -145,3 +145,97 @@ class ErrorResponse(Schema):
     error: str
     details: Optional[str] = None
 
+
+class CreateJobApplicationRequest(Schema):
+    """Schema for creating a job application"""
+    job_id: Optional[str] = None  # Optional: if provided, links to existing JobListing
+    job_title: str
+    company_name: str
+    job_location: Optional[str] = None
+    job_url: Optional[str] = None
+    notes: Optional[str] = None
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "job_id": "3789456123",
+                "job_title": "Data Scientist",
+                "company_name": "Tech Company Inc.",
+                "job_location": "Vienna, Austria",
+                "job_url": "https://www.linkedin.com/jobs/view/3789456123",
+                "notes": "Applied via LinkedIn"
+            }
+        }
+
+
+class JobApplicationSchema(Schema):
+    """Schema for a job application"""
+    id: int
+    job_id: Optional[str] = None  # From linked JobListing if exists
+    job_title: str
+    company_name: str
+    job_location: Optional[str] = None
+    job_url: Optional[str] = None
+    notes: Optional[str] = None
+    applied_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+        schema_extra = {
+            "example": {
+                "id": 1,
+                "job_id": "3789456123",
+                "job_title": "Data Scientist",
+                "company_name": "Tech Company Inc.",
+                "job_location": "Vienna, Austria",
+                "job_url": "https://www.linkedin.com/jobs/view/3789456123",
+                "notes": "Applied via LinkedIn",
+                "applied_at": "2025-01-15T10:30:00Z",
+                "updated_at": "2025-01-15T10:30:00Z"
+            }
+        }
+
+
+class JobApplicationListResponse(Schema):
+    """Schema for listing job applications"""
+    applications: List[JobApplicationSchema]
+    count: int
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "applications": [
+                    {
+                        "id": 1,
+                        "job_id": "3789456123",
+                        "job_title": "Data Scientist",
+                        "company_name": "Tech Company Inc.",
+                        "job_location": "Vienna, Austria",
+                        "job_url": "https://www.linkedin.com/jobs/view/3789456123",
+                        "notes": "Applied via LinkedIn",
+                        "applied_at": "2025-01-15T10:30:00Z",
+                        "updated_at": "2025-01-15T10:30:00Z"
+                    }
+                ],
+                "count": 1
+            }
+        }
+
+
+class CreateJobApplicationResponse(Schema):
+    """Schema for create job application response"""
+    success: bool = True
+    application: JobApplicationSchema
+
+
+class CheckApplicationResponse(Schema):
+    """Schema for checking if user has applied to a job"""
+    has_applied: bool
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "has_applied": True
+            }
+        }

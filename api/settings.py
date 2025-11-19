@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'ninja_jwt',
+    'django_apscheduler',  # For scheduled tasks (like Spring Boot @Scheduled)
     'templates',
     'authentication',
     'jobs',

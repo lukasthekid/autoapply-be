@@ -70,7 +70,7 @@ def search_jobs(request, payload: JobSearchRequest):
             for job_data in jobs_data:
                 try:
                     # Check if job already exists
-                    job_listing, created = JobListing.objects.update_or_create(
+                    job_listing, created = JobListing.objects.get_or_create(
                         job_id=job_data['job_id'],
                         defaults={
                             'linkedin_url': job_data.get('linkedin_url', ''),
@@ -87,12 +87,61 @@ def search_jobs(request, payload: JobSearchRequest):
                             'search_location': job_data.get('search_location'),
                         }
                     )
+                    
+                    # If job already exists, only update fields that:
+                    # 1. Have actual values (not None)
+                    # 2. Don't overwrite enriched data (preserve description if enriched)
+                    was_enriched = False
+                    if not created:
+                        # Store original enriched status
+                        was_enriched = job_listing.is_enriched
+                        
+                        # Update basic fields only if they're missing or if we have new values
+                        if job_data.get('linkedin_url'):
+                            job_listing.linkedin_url = job_data.get('linkedin_url', job_listing.linkedin_url)
+                        if job_data.get('title') and not job_listing.title:
+                            job_listing.title = job_data.get('title')
+                        if job_data.get('company_name') and not job_listing.company_name:
+                            job_listing.company_name = job_data.get('company_name')
+                        if job_data.get('location') and not job_listing.location:
+                            job_listing.location = job_data.get('location')
+                        
+                        # Only update description if job wasn't enriched or if description is missing
+                        if not was_enriched and job_data.get('description'):
+                            job_listing.description = job_data.get('description')
+                        elif was_enriched and not job_listing.description and job_data.get('description'):
+                            # Only update if enriched job has no description yet
+                            job_listing.description = job_data.get('description')
+                        
+                        # Only update optional fields if they're missing
+                        if not job_listing.employment_type and job_data.get('employment_type'):
+                            job_listing.employment_type = job_data.get('employment_type')
+                        if not job_listing.experience_level and job_data.get('experience_level'):
+                            job_listing.experience_level = job_data.get('experience_level')
+                        if not job_listing.posted_date and job_data.get('posted_date'):
+                            job_listing.posted_date = job_data.get('posted_date')
+                        if job_data.get('applicants_count') is not None:
+                            job_listing.applicants_count = job_data.get('applicants_count')
+                        if not job_listing.company_logo_url and job_data.get('company_logo_url'):
+                            job_listing.company_logo_url = job_data.get('company_logo_url')
+                        
+                        # Update search metadata (safe to update)
+                        if job_data.get('search_keyword'):
+                            job_listing.search_keyword = job_data.get('search_keyword')
+                        if job_data.get('search_location'):
+                            job_listing.search_location = job_data.get('search_location')
+                        
+                        # Preserve enriched status
+                        job_listing.is_enriched = was_enriched
+                        
+                        job_listing.save()
+                    
                     job_listings.append(job_listing)
                     
                     if created:
                         logger.info(f"Created new job listing: {job_listing.job_id}")
                     else:
-                        logger.info(f"Updated existing job listing: {job_listing.job_id}")
+                        logger.info(f"Updated existing job listing: {job_listing.job_id} (preserved enriched status: {was_enriched})")
                         
                 except Exception as e:
                     logger.error(f"Error storing job {job_data.get('job_id')}: {str(e)}")
@@ -466,6 +515,7 @@ def enrich_job_details(request, job_id: str):
             )
         
         # Update the job listing with detailed information
+        # Only update fields that are missing or if we have better data
         updated_fields = []
         
         if job_details.get('title') and not job_listing.title:
@@ -480,19 +530,21 @@ def enrich_job_details(request, job_id: str):
             job_listing.location = job_details['location']
             updated_fields.append('location')
         
+        # Update description if missing, or always update during enrichment (enrichment should have better data)
         if job_details.get('description'):
             job_listing.description = job_details['description']
             updated_fields.append('description')
         
-        if job_details.get('employment_type'):
+        # Update optional fields if missing or if we have new data
+        if job_details.get('employment_type') and (not job_listing.employment_type or job_listing.employment_type != job_details['employment_type']):
             job_listing.employment_type = job_details['employment_type']
             updated_fields.append('employment_type')
         
-        if job_details.get('experience_level'):
+        if job_details.get('experience_level') and (not job_listing.experience_level or job_listing.experience_level != job_details['experience_level']):
             job_listing.experience_level = job_details['experience_level']
             updated_fields.append('experience_level')
         
-        if job_details.get('applicants_count'):
+        if job_details.get('applicants_count') is not None:
             job_listing.applicants_count = job_details['applicants_count']
             updated_fields.append('applicants_count')
         
@@ -500,7 +552,7 @@ def enrich_job_details(request, job_id: str):
             job_listing.company_logo_url = job_details['company_logo_url']
             updated_fields.append('company_logo_url')
         
-        # Mark job as enriched
+        # Mark job as enriched (always set this when enriching)
         job_listing.is_enriched = True
         updated_fields.append('is_enriched')
         

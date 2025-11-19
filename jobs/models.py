@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class JobListing(models.Model):
@@ -83,3 +86,59 @@ class JobSearch(models.Model):
     
     def __str__(self):
         return f"Search: {self.keyword} in {self.location}"
+
+
+class JobApplication(models.Model):
+    """Model to track user job applications"""
+    
+    # User who applied
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='job_applications',
+        db_index=True
+    )
+    
+    # Link to job listing (nullable for custom applications)
+    job_listing = models.ForeignKey(
+        JobListing,
+        on_delete=models.SET_NULL,
+        related_name='applications',
+        null=True,
+        blank=True,
+        db_index=True
+    )
+    
+    # Job details (stored directly for custom jobs or as backup)
+    job_title = models.CharField(max_length=500)
+    company_name = models.CharField(max_length=500)
+    job_location = models.CharField(max_length=500, blank=True, null=True)
+    job_url = models.URLField(max_length=500, blank=True, null=True)
+    
+    # Application metadata
+    notes = models.TextField(blank=True, null=True, help_text="Optional notes about the application")
+    
+    # Timestamps
+    applied_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-applied_at']
+        indexes = [
+            models.Index(fields=['user', '-applied_at']),
+            models.Index(fields=['-applied_at']),
+            models.Index(fields=['company_name']),
+        ]
+        constraints = [
+            # Prevent duplicate applications for the same user and job listing
+            models.UniqueConstraint(
+                fields=['user', 'job_listing'],
+                condition=models.Q(job_listing__isnull=False),
+                name='unique_user_job_listing'
+            ),
+        ]
+        verbose_name = 'Job Application'
+        verbose_name_plural = 'Job Applications'
+    
+    def __str__(self):
+        return f"{self.user.username} applied to {self.job_title} at {self.company_name}"

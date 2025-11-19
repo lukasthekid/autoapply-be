@@ -216,3 +216,6 @@ certbot/
 # Backup files
 backup_*
 *.backup
+
+# Logs directory
+logs/
