@@ -131,17 +131,17 @@ jobs:
       - name: Create deployment directory on server
         run: |
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} '
-            mkdir -p ~/autoapply-be
+            mkdir -p /opt/stacks/autoapply-be
           '
       
       - name: Copy docker-compose files to server
         run: |
-          scp -i ~/.ssh/id_ed25519 docker-compose.yml docker-compose.prod.yml ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:~/autoapply-be/
+          scp -i ~/.ssh/id_ed25519 docker-compose.yml docker-compose.prod.yml ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/opt/stacks/autoapply-be/
       
       - name: Create .env file on server
         run: |
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} '
-            cd ~/autoapply-be
+            cd /opt/stacks/autoapply-be
             cat > .env << EOF
           SECRET_KEY=${{ secrets.SECRET_KEY }}
           DEBUG=False
@@ -171,7 +171,7 @@ jobs:
       - name: Deploy with Docker Compose
         run: |
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} '
-            cd ~/autoapply-be
+            cd /opt/stacks/autoapply-be
             docker compose -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
@@ -191,9 +191,9 @@ jobs:
           sleep 10
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} '
             # Check if Django container is running and healthy
-            docker compose -f ~/autoapply-be/docker-compose.yml -f ~/autoapply-be/docker-compose.prod.yml ps | grep "Up" || exit 1
-            # Check if port 8000 is responding
-            curl -f http://5.75.171.23:8000/api/docs -H "Host: api.project100x.run.place" > /dev/null 2>&1 || echo "Django is starting..."
+            docker compose -f /opt/stacks/autoapply-be/docker-compose.yml -f /opt/stacks/autoapply-be/docker-compose.prod.yml ps | grep "Up" || exit 1
+            # Check if port 8000 is responding locally (since API is not publicly accessible)
+            curl -f http://localhost:8000/api/docs > /dev/null 2>&1 || echo "Django is starting, might need a few more seconds..."
           '
       
       - name: Deployment notification
