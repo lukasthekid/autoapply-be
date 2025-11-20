@@ -169,7 +169,16 @@ def get_current_user(request):
     Returns information about the currently authenticated user.
     Requires a valid JWT token.
     """
-    return request.auth
+    user = request.auth
+    return UserSchema(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        is_active=user.is_active,
+        date_joined=user.date_joined.isoformat(),
+    )
 
 
 @router.post(
