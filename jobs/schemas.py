@@ -1,5 +1,5 @@
-from typing import List, Optional
-from datetime import datetime
+from typing import List, Optional, Dict
+from datetime import datetime, date
 from ninja import Schema
 from enum import Enum
 
@@ -28,6 +28,17 @@ class DatePostedEnum(str, Enum):
     PAST_24_HOURS = "past_24_hours"
     PAST_WEEK = "past_week"
     PAST_MONTH = "past_month"
+
+
+class ApplicationStatusEnum(str, Enum):
+    """Enum for job application status"""
+    APPLIED = "applied"
+    DECLINED = "declined"
+    PHONE_SCREENING = "phone_screening"
+    FIRST_ROUND = "first_round"
+    SECOND_ROUND = "second_round"
+    THIRD_ROUND = "third_round"
+    OFFER = "offer"
 
 
 class JobSearchRequest(Schema):
@@ -177,6 +188,7 @@ class JobApplicationSchema(Schema):
     job_location: Optional[str] = None
     job_url: Optional[str] = None
     notes: Optional[str] = None
+    status: ApplicationStatusEnum = ApplicationStatusEnum.APPLIED
     applied_at: datetime
     updated_at: datetime
     
@@ -191,6 +203,7 @@ class JobApplicationSchema(Schema):
                 "job_location": "Vienna, Austria",
                 "job_url": "https://www.linkedin.com/jobs/view/3789456123",
                 "notes": "Applied via LinkedIn",
+                "status": "applied",
                 "applied_at": "2025-01-15T10:30:00Z",
                 "updated_at": "2025-01-15T10:30:00Z"
             }
@@ -237,5 +250,57 @@ class CheckApplicationResponse(Schema):
         schema_extra = {
             "example": {
                 "has_applied": True
+            }
+        }
+
+
+class UpdateApplicationStatusRequest(Schema):
+    """Schema for updating application status"""
+    status: ApplicationStatusEnum
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "status": "phone_screening"
+            }
+        }
+
+
+class UpdateApplicationStatusResponse(Schema):
+    """Schema for update application status response"""
+    success: bool = True
+    application: JobApplicationSchema
+
+
+class ApplicationStatsResponse(Schema):
+    """Schema for job application statistics"""
+    total_applications: int
+    applications_this_week: int
+    applications_last_7_days: Dict[str, int]  # Maps date (YYYY-MM-DD) to count
+    status_counts: dict  # Maps status to count
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "total_applications": 25,
+                "applications_this_week": 5,
+                "applications_last_7_days": {
+                    "2025-01-15": 2,
+                    "2025-01-16": 1,
+                    "2025-01-17": 0,
+                    "2025-01-18": 3,
+                    "2025-01-19": 1,
+                    "2025-01-20": 0,
+                    "2025-01-21": 2
+                },
+                "status_counts": {
+                    "applied": 15,
+                    "phone_screening": 3,
+                    "first_round": 2,
+                    "second_round": 1,
+                    "third_round": 0,
+                    "offer": 1,
+                    "declined": 3
+                }
             }
         }

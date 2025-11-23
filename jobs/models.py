@@ -91,6 +91,16 @@ class JobSearch(models.Model):
 class JobApplication(models.Model):
     """Model to track user job applications"""
     
+    # Application status choices
+    class ApplicationStatus(models.TextChoices):
+        APPLIED = "applied", "Applied"
+        DECLINED = "declined", "Declined"
+        PHONE_SCREENING = "phone_screening", "Phone Screening"
+        FIRST_ROUND = "first_round", "First Round"
+        SECOND_ROUND = "second_round", "Second Round"
+        THIRD_ROUND = "third_round", "Third Round"
+        OFFER = "offer", "Offer"
+    
     # User who applied
     user = models.ForeignKey(
         User,
@@ -117,6 +127,13 @@ class JobApplication(models.Model):
     
     # Application metadata
     notes = models.TextField(blank=True, null=True, help_text="Optional notes about the application")
+    status = models.CharField(
+        max_length=20,
+        choices=ApplicationStatus.choices,
+        default=ApplicationStatus.APPLIED,
+        db_index=True,
+        help_text="Current status of the application"
+    )
     
     # Timestamps
     applied_at = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -128,6 +145,7 @@ class JobApplication(models.Model):
             models.Index(fields=['user', '-applied_at']),
             models.Index(fields=['-applied_at']),
             models.Index(fields=['company_name']),
+            models.Index(fields=['status']),
         ]
         constraints = [
             # Prevent duplicate applications for the same user and job listing

@@ -3,6 +3,10 @@ from ninja_jwt.authentication import JWTAuth
 from ninja.errors import HttpError
 from typing import List
 from django.contrib.auth import get_user_model
+from django.utils import timezone
+from datetime import timedelta, date
+from django.db.models import Count
+from django.db.models.functions import TruncDate
 
 from .models import JobApplication, JobListing
 from .schemas import (
@@ -12,6 +16,9 @@ from .schemas import (
     JobApplicationListResponse,
     CheckApplicationResponse,
     ErrorResponse,
+    UpdateApplicationStatusRequest,
+    UpdateApplicationStatusResponse,
+    ApplicationStatsResponse,
 )
 
 User = get_user_model()
@@ -119,6 +126,7 @@ def create_job_application(request, payload: CreateJobApplicationRequest):
             job_location=application.job_location,
             job_url=application.job_url,
             notes=application.notes,
+            status=application.status,
             applied_at=application.applied_at,
             updated_at=application.updated_at,
         )
@@ -167,6 +175,7 @@ def list_job_applications(request):
             job_location=application.job_location,
             job_url=application.job_url,
             notes=application.notes,
+            status=application.status,
             applied_at=application.applied_at,
             updated_at=application.updated_at,
         ))
@@ -174,6 +183,95 @@ def list_job_applications(request):
     return JobApplicationListResponse(
         applications=application_schemas,
         count=len(application_schemas)
+    )
+
+
+@router.get(
+    "/stats",
+    response=ApplicationStatsResponse,
+    auth=JWTAuth(),
+    summary="Get job application statistics",
+    description="Get statistics about the authenticated user's job applications including total count, applications this week, daily counts for last 7 days, and counts by status. Requires authentication."
+)
+def get_application_stats(request):
+    """
+    Get statistics about the user's job applications.
+    
+    Returns:
+    - total_applications: Total number of applications
+    - applications_this_week: Number of applications created this week (Monday to Sunday)
+    - applications_last_7_days: Dictionary mapping date (YYYY-MM-DD) to count of applications for that day
+    - status_counts: Dictionary mapping each application status to its count
+    
+    Requires a valid JWT token in the Authorization header.
+    """
+    # Get authenticated user from JWT token
+    user = request.user
+    
+    # Get all applications for this user
+    applications = JobApplication.objects.filter(user=user)
+    
+    # Calculate start of this week (Monday at 00:00:00)
+    now = timezone.now()
+    # Get Monday of current week
+    days_since_monday = now.weekday()  # Monday is 0, Sunday is 6
+    start_of_week = (now - timedelta(days=days_since_monday)).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    
+    # Calculate last 7 days (including today)
+    today = now.date()
+    start_of_last_7_days = today - timedelta(days=6)  # 6 days ago + today = 7 days
+    
+    # Count total applications
+    total_applications = applications.count()
+    
+    # Count applications this week
+    applications_this_week = applications.filter(
+        applied_at__gte=start_of_week
+    ).count()
+    
+    # Get applications for the last 7 days and group by date
+    applications_last_7_days_query = applications.filter(
+        applied_at__date__gte=start_of_last_7_days
+    ).annotate(
+        date=TruncDate('applied_at')
+    ).values('date').annotate(
+        count=Count('id')
+    )
+    
+    # Initialize dictionary with all 7 days set to 0
+    applications_last_7_days = {}
+    for i in range(7):
+        day = start_of_last_7_days + timedelta(days=i)
+        applications_last_7_days[day.isoformat()] = 0
+    
+    # Update with actual counts
+    for item in applications_last_7_days_query:
+        date_str = item['date'].isoformat() if item['date'] else None
+        if date_str:
+            applications_last_7_days[date_str] = item['count']
+    
+    # Count applications by status
+    status_counts_query = applications.values('status').annotate(
+        count=Count('id')
+    )
+    
+    # Initialize status counts dictionary with all possible statuses set to 0
+    status_counts = {
+        status.value: 0 
+        for status in JobApplication.ApplicationStatus
+    }
+    
+    # Update with actual counts
+    for item in status_counts_query:
+        status_counts[item['status']] = item['count']
+    
+    return ApplicationStatsResponse(
+        total_applications=total_applications,
+        applications_this_week=applications_this_week,
+        applications_last_7_days=applications_last_7_days,
+        status_counts=status_counts
     )
 
 
@@ -208,6 +306,7 @@ def get_job_application(request, application_id: int):
             job_location=application.job_location,
             job_url=application.job_url,
             notes=application.notes,
+            status=application.status,
             applied_at=application.applied_at,
             updated_at=application.updated_at,
         )
@@ -290,4 +389,68 @@ def check_job_application(
         )
     
     return CheckApplicationResponse(has_applied=has_applied)
+
+
+@router.patch(
+    "/{application_id}/status",
+    response={200: UpdateApplicationStatusResponse, 400: ErrorResponse, 404: ErrorResponse},
+    auth=JWTAuth(),
+    summary="Update application status",
+    description="Update the status of a specific job application. Only the owner of the application can update it. Requires authentication."
+)
+def update_application_status(request, application_id: int, payload: UpdateApplicationStatusRequest):
+    """
+    Update the status of a job application.
+    
+    This endpoint allows users to update the status of their job applications.
+    Valid statuses are: applied, declined, phone_screening, first_round, second_round, third_round, offer.
+    
+    Only the owner of the application can update it.
+    Requires a valid JWT token in the Authorization header.
+    """
+    # Get authenticated user from JWT token
+    user = request.user
+    
+    try:
+        # Get the application and ensure it belongs to the user
+        application = JobApplication.objects.select_related('job_listing').get(
+            id=application_id,
+            user=user  # Ensure user can only update their own applications
+        )
+        
+        # Update the status
+        application.status = payload.status
+        application.save()
+        
+        # Build response schema
+        application_schema = JobApplicationSchema(
+            id=application.id,
+            job_id=application.job_listing.job_id if application.job_listing else None,
+            job_title=application.job_title,
+            company_name=application.company_name,
+            job_location=application.job_location,
+            job_url=application.job_url,
+            notes=application.notes,
+            status=application.status,
+            applied_at=application.applied_at,
+            updated_at=application.updated_at,
+        )
+        
+        return 200, UpdateApplicationStatusResponse(
+            success=True,
+            application=application_schema
+        )
+        
+    except JobApplication.DoesNotExist:
+        return 404, ErrorResponse(
+            success=False,
+            error="Application not found",
+            details=f"Job application with ID {application_id} not found or you don't have permission to update it"
+        )
+    except Exception as e:
+        return 400, ErrorResponse(
+            success=False,
+            error="Failed to update application status",
+            details=str(e)
+        )
 
