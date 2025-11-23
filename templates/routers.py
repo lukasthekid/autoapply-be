@@ -12,6 +12,7 @@ from authentication.models import Country
 from jinja2 import Template
 import base64
 import typst
+from datetime import datetime
 
 User = get_user_model()
 router = Router(tags=["templates"])
@@ -135,14 +136,21 @@ def convert_to_pdf(request, payload: ConvertToPdfRequest):
     # Escape Typst special characters in the content
     escaped_content = escape_typst_characters(payload.content)
     
+    # Get current date in DD/MM/YYYY format
+    current_date = datetime.now().strftime("%d/%m/%Y")
+    
     # Prepare template variables for Jinja2
     template_vars = {
         "company_name": payload.company_name,
+        "first_name": escape_typst_characters(user.first_name or ""),
+        "last_name": escape_typst_characters(user.last_name or ""),
         "street": profile.street or "",
         "post_code": profile.postcode or "",
         "city": profile.city or "",
         "country": Country(profile.country).label if profile.country else "",
         "email": escape_typst_characters(user.email),
+        "phone": escape_typst_characters(profile.phone_number or ""),
+        "now": current_date,
         "content": escaped_content,
     }
     
