@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from typing import List, Dict, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 import time
 import logging
@@ -203,7 +203,7 @@ class LinkedInJobScraper:
             limit: Maximum number of results to return
             
         Returns:
-            List of job dictionaries
+            List of job dictionaries containing only 'job_id' and 'linkedin_url'
         """
         jobs = []
         seen_job_ids = set()  # Track job IDs to avoid duplicates
@@ -255,10 +255,11 @@ class LinkedInJobScraper:
                         # Check for duplicates
                         job_id = job_data.get('job_id')
                         if job_id and job_id not in seen_job_ids:
-                            # Add search metadata
-                            job_data['search_keyword'] = keyword
-                            job_data['search_location'] = location
-                            jobs.append(job_data)
+                            # Only return job_id and linkedin_url
+                            jobs.append({
+                                'job_id': job_id,
+                                'linkedin_url': job_data.get('linkedin_url', f"https://www.linkedin.com/jobs/view/{job_id}")
+                            })
                             seen_job_ids.add(job_id)
                             jobs_found_on_page += 1
                         elif job_id:
@@ -327,8 +328,61 @@ class LinkedInJobScraper:
             
             # Extract location
             location_elem = soup.find('span', class_='topcard__flavor--bullet')
+            if not location_elem:
+                # Try alternative location selectors
+                location_elem = soup.find('span', class_='topcard-layout__bullet')
             if location_elem:
                 job_details['location'] = location_elem.get_text(strip=True)
+            
+            # Extract posted date
+            # Look for time element in the top card area
+            posted_date = None
+            time_elem = soup.find('time')
+            if not time_elem:
+                # Try finding in top card layout
+                top_card = soup.find('div', class_='top-card-layout')
+                if top_card:
+                    time_elem = top_card.find('time')
+            
+            if time_elem and time_elem.get('datetime'):
+                try:
+                    datetime_str = time_elem.get('datetime')
+                    # Handle different datetime formats
+                    if 'Z' in datetime_str:
+                        posted_date = datetime.fromisoformat(datetime_str.replace('Z', '+00:00'))
+                    else:
+                        posted_date = datetime.fromisoformat(datetime_str)
+                except Exception as e:
+                    logger.debug(f"Could not parse datetime '{time_elem.get('datetime')}': {e}")
+            
+            # If still no date, try to find relative date text and parse it
+            if not posted_date:
+                # Look for text patterns like "4 days ago", "2 weeks ago", etc.
+                date_pattern = re.compile(r'(\d+)\s+(day|days|hour|hours|week|weeks|month|months)\s+ago', re.I)
+                for elem in soup.find_all(['span', 'div', 'p', 'time']):
+                    text = elem.get_text(strip=True)
+                    match = date_pattern.search(text)
+                    if match:
+                        # Calculate approximate date (for relative dates)
+                        # This is approximate - in production you might want more sophisticated parsing
+                        value = int(match.group(1))
+                        unit = match.group(2).lower()
+                        
+                        if 'day' in unit:
+                            posted_date = datetime.now() - timedelta(days=value)
+                        elif 'hour' in unit:
+                            posted_date = datetime.now() - timedelta(hours=value)
+                        elif 'week' in unit:
+                            posted_date = datetime.now() - timedelta(weeks=value)
+                        elif 'month' in unit:
+                            posted_date = datetime.now() - timedelta(days=value * 30)  # Approximate
+                        break
+            
+            job_details['posted_date'] = posted_date
+            if posted_date:
+                logger.debug(f"Extracted posted_date for job {job_id}: {posted_date}")
+            else:
+                logger.debug(f"Could not extract posted_date for job {job_id}")
             
             # Extract full job description
             desc_elem = soup.find('div', class_='show-more-less-html__markup')
@@ -371,9 +425,49 @@ class LinkedInJobScraper:
                     job_details['applicants_count'] = int(applicants_match.group(1))
             
             # Extract company logo
+            # Try multiple selectors for company logo
             logo_elem = soup.find('img', class_='artdeco-entity-image')
-            if logo_elem and logo_elem.get('src'):
-                job_details['company_logo_url'] = logo_elem.get('src')
+            if not logo_elem:
+                # Try finding in top card layout entity image container
+                top_card_entity = soup.find('div', class_='top-card-layout__entity-image')
+                if top_card_entity:
+                    logo_elem = top_card_entity.find('img')
+            if not logo_elem:
+                # Try alternative class names
+                logo_elem = soup.find('img', {'class': re.compile(r'.*logo.*', re.I)})
+            if not logo_elem:
+                # Look in top card layout area
+                top_card = soup.find('div', class_='top-card-layout')
+                if top_card:
+                    logo_elem = top_card.find('img', class_=re.compile(r'.*entity.*image.*', re.I))
+            if not logo_elem:
+                # Try finding company logo near company name
+                topcard_org = soup.find('a', class_='topcard__org-name-link')
+                if topcard_org:
+                    # Look for img in nearby elements
+                    parent = topcard_org.find_parent()
+                    if parent:
+                        logo_elem = parent.find('img')
+                        if not logo_elem:
+                            # Try finding in siblings
+                            for sibling in parent.find_next_siblings():
+                                logo_elem = sibling.find('img')
+                                if logo_elem:
+                                    break
+            
+            if logo_elem:
+                # Try src first, then data-delayed-url, then data-src, then data-original-url
+                logo_url = (logo_elem.get('src') or 
+                           logo_elem.get('data-delayed-url') or 
+                           logo_elem.get('data-src') or
+                           logo_elem.get('data-original-url'))
+                if logo_url:
+                    job_details['company_logo_url'] = logo_url
+                    logger.debug(f"Found company logo URL for job {job_id}: {logo_url}")
+                else:
+                    logger.debug(f"Found logo element for job {job_id} but no valid URL attribute")
+            else:
+                logger.debug(f"Could not find company logo element for job {job_id}")
             
             logger.info(f"Successfully extracted details for job {job_id}")
             return job_details

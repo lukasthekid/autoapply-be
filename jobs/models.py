@@ -27,13 +27,6 @@ class JobListing(models.Model):
     applicants_count = models.IntegerField(blank=True, null=True)
     company_logo_url = models.URLField(max_length=500, blank=True, null=True)
     
-    # Search metadata
-    search_keyword = models.CharField(max_length=255, blank=True, null=True)
-    search_location = models.CharField(max_length=255, blank=True, null=True)
-    
-    # Enrichment status
-    is_enriched = models.BooleanField(default=False, db_index=True)
-    
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -86,6 +79,59 @@ class JobSearch(models.Model):
     
     def __str__(self):
         return f"Search: {self.keyword} in {self.location}"
+
+
+class SearchProfile(models.Model):
+    """Model to store user-defined job search profiles"""
+    
+    # User who owns this profile
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='search_profiles',
+        db_index=True
+    )
+    
+    # Profile name/title (optional, for user identification)
+    name = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Optional name for this search profile"
+    )
+    
+    # Search parameters (matching JobSearchRequest)
+    keyword = models.CharField(max_length=255)
+    location = models.CharField(max_length=255)
+    job_types = ArrayField(
+        models.CharField(max_length=50),
+        blank=True,
+        default=list,
+        help_text="List of job types (full_time, part_time, contract, etc.)"
+    )
+    experience_levels = ArrayField(
+        models.CharField(max_length=50),
+        blank=True,
+        default=list,
+        help_text="List of experience levels (entry_level, mid_senior_level, etc.)"
+    )
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['keyword', 'location']),
+            models.Index(fields=['-created_at']),
+        ]
+        verbose_name = 'Search Profile'
+        verbose_name_plural = 'Search Profiles'
+    
+    def __str__(self):
+        profile_name = f" ({self.name})" if self.name else ""
+        return f"Profile{profile_name}: {self.keyword} in {self.location}"
 
 
 class JobApplication(models.Model):

@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict
-from datetime import datetime, date
+from datetime import datetime
 from ninja import Schema
 from enum import Enum
 
@@ -64,6 +64,20 @@ class JobSearchRequest(Schema):
         }
 
 
+class ProfileSearchRequest(Schema):
+    """Schema for running searches based on saved search profiles"""
+    date_posted: Optional[DatePostedEnum] = None
+    limit: Optional[int] = 25
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "date_posted": "past_week",
+                "limit": 25
+            }
+        }
+
+
 class JobListingSchema(Schema):
     """Schema for a single job listing"""
     job_id: str
@@ -77,7 +91,6 @@ class JobListingSchema(Schema):
     posted_date: Optional[datetime] = None
     applicants_count: Optional[int] = None
     company_logo_url: Optional[str] = None
-    is_enriched: bool = False
     
     class Config:
         schema_extra = {
@@ -302,5 +315,96 @@ class ApplicationStatsResponse(Schema):
                     "offer": 1,
                     "declined": 3
                 }
+            }
+        }
+
+
+class CreateSearchProfileRequest(Schema):
+    """Schema for creating a search profile"""
+    name: Optional[str] = None
+    keyword: str
+    location: str
+    job_types: Optional[List[JobTypeEnum]] = None
+    experience_levels: Optional[List[ExperienceLevelEnum]] = None
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "Data Scientist in Vienna",
+                "keyword": "Data Scientist",
+                "location": "Vienna",
+                "job_types": ["full_time", "contract"],
+                "experience_levels": ["entry_level", "mid_senior_level"],
+            }
+        }
+
+
+class UpdateSearchProfileRequest(Schema):
+    """Schema for updating a search profile"""
+    name: Optional[str] = None
+    keyword: Optional[str] = None
+    location: Optional[str] = None
+    job_types: Optional[List[JobTypeEnum]] = None
+    experience_levels: Optional[List[ExperienceLevelEnum]] = None
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "Updated Data Scientist Profile",
+                "keyword": "Data Scientist",
+                "location": "Vienna, Austria",
+                "job_types": ["full_time"],
+            }
+        }
+
+
+class SearchProfileSchema(Schema):
+    """Schema for a search profile"""
+    id: int
+    name: Optional[str] = None
+    keyword: str
+    location: str
+    job_types: List[JobTypeEnum] = []
+    experience_levels: List[ExperienceLevelEnum] = []
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+        schema_extra = {
+            "example": {
+                "id": 1,
+                "name": "Data Scientist in Vienna",
+                "keyword": "Data Scientist",
+                "location": "Vienna",
+                "job_types": ["full_time", "contract"],
+                "experience_levels": ["entry_level", "mid_senior_level"],
+                "created_at": "2025-01-15T10:30:00Z",
+                "updated_at": "2025-01-15T10:30:00Z"
+            }
+        }
+
+
+class SearchProfileListResponse(Schema):
+    """Schema for listing search profiles"""
+    profiles: List[SearchProfileSchema]
+    count: int
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "profiles": [
+                    {
+                        "id": 1,
+                        "name": "Data Scientist in Vienna",
+                        "keyword": "Data Scientist",
+                        "location": "Vienna",
+                        "job_types": ["full_time"],
+                        "experience_levels": ["mid_senior_level"],
+                        "created_at": "2025-01-15T10:30:00Z",
+                        "updated_at": "2025-01-15T10:30:00Z"
+                    }
+                ],
+                "count": 1
             }
         }

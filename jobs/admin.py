@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import JobListing, JobSearch, JobApplication
+from .models import JobListing, JobSearch, JobApplication, SearchProfile, SearchProfile
 
 
 @admin.register(JobListing)
@@ -56,12 +56,6 @@ class JobListingAdmin(admin.ModelAdmin):
                 'posted_date',
                 'applicants_count',
                 'company_logo_url',
-            )
-        }),
-        ('Search Metadata', {
-            'fields': (
-                'search_keyword',
-                'search_location',
             )
         }),
         ('Timestamps', {
@@ -193,3 +187,67 @@ class JobApplicationAdmin(admin.ModelAdmin):
     ordering = ['-applied_at']
     
     raw_id_fields = ['user', 'job_listing']
+
+
+@admin.register(SearchProfile)
+class SearchProfileAdmin(admin.ModelAdmin):
+    """Admin interface for SearchProfile model"""
+    
+    list_display = [
+        'id',
+        'user',
+        'name',
+        'keyword',
+        'location',
+        'created_at',
+        'updated_at',
+    ]
+    
+    list_filter = [
+        'created_at',
+        'updated_at',
+    ]
+    
+    search_fields = [
+        'user__username',
+        'user__email',
+        'name',
+        'keyword',
+        'location',
+    ]
+    
+    readonly_fields = [
+        'created_at',
+        'updated_at',
+    ]
+    
+    fieldsets = (
+        ('User Information', {
+            'fields': (
+                'user',
+            )
+        }),
+        ('Profile Information', {
+            'fields': (
+                'name',
+            )
+        }),
+        ('Search Parameters', {
+            'fields': (
+                'keyword',
+                'location',
+                'job_types',
+                'experience_levels',
+            )
+        }),
+        ('Timestamps', {
+            'fields': (
+                'created_at',
+                'updated_at',
+            )
+        }),
+    )
+    
+    ordering = ['-created_at']
+    
+    raw_id_fields = ['user']
