@@ -233,4 +233,3 @@ def create_cover_letter_simple(request, payload: CreateCoverLetterSimpleRequest)
         cover_letter_text=cover_letter_text,
         success=True
     )
-

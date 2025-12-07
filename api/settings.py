@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'ninja_jwt',
     'django_apscheduler',  # For scheduled tasks (like Spring Boot @Scheduled)
     'templates',
+    'cover_letters',
+    'resumes',
     'authentication',
     'jobs',
     'documents',
