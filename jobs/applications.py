@@ -276,50 +276,6 @@ def get_application_stats(request):
 
 
 @router.get(
-    "/{application_id}",
-    response={200: JobApplicationSchema, 404: ErrorResponse},
-    auth=JWTAuth(),
-    summary="Get a specific job application",
-    description="Get details of a specific job application by ID. Only returns applications belonging to the authenticated user. Requires authentication."
-)
-def get_job_application(request, application_id: int):
-    """
-    Get a specific job application by ID.
-    
-    Only returns applications that belong to the authenticated user.
-    Requires a valid JWT token in the Authorization header.
-    """
-    # Get authenticated user from JWT token
-    user = request.user
-    
-    try:
-        application = JobApplication.objects.select_related('job_listing').get(
-            id=application_id,
-            user=user  # Ensure user can only access their own applications
-        )
-        
-        return 200, JobApplicationSchema(
-            id=application.id,
-            job_id=application.job_listing.job_id if application.job_listing else None,
-            job_title=application.job_title,
-            company_name=application.company_name,
-            job_location=application.job_location,
-            job_url=application.job_url,
-            notes=application.notes,
-            status=application.status,
-            applied_at=application.applied_at,
-            updated_at=application.updated_at,
-        )
-        
-    except JobApplication.DoesNotExist:
-        return 404, ErrorResponse(
-            success=False,
-            error="Application not found",
-            details=f"Job application with ID {application_id} not found or you don't have permission to access it"
-        )
-
-
-@router.get(
     "/check",
     response=CheckApplicationResponse,
     auth=JWTAuth(),
@@ -391,6 +347,50 @@ def check_job_application(
     return CheckApplicationResponse(has_applied=has_applied)
 
 
+@router.get(
+    "/{application_id}",
+    response={200: JobApplicationSchema, 404: ErrorResponse},
+    auth=JWTAuth(),
+    summary="Get a specific job application",
+    description="Get details of a specific job application by ID. Only returns applications belonging to the authenticated user. Requires authentication."
+)
+def get_job_application(request, application_id: int):
+    """
+    Get a specific job application by ID.
+    
+    Only returns applications that belong to the authenticated user.
+    Requires a valid JWT token in the Authorization header.
+    """
+    # Get authenticated user from JWT token
+    user = request.user
+    
+    try:
+        application = JobApplication.objects.select_related('job_listing').get(
+            id=application_id,
+            user=user  # Ensure user can only access their own applications
+        )
+        
+        return 200, JobApplicationSchema(
+            id=application.id,
+            job_id=application.job_listing.job_id if application.job_listing else None,
+            job_title=application.job_title,
+            company_name=application.company_name,
+            job_location=application.job_location,
+            job_url=application.job_url,
+            notes=application.notes,
+            status=application.status,
+            applied_at=application.applied_at,
+            updated_at=application.updated_at,
+        )
+        
+    except JobApplication.DoesNotExist:
+        return 404, ErrorResponse(
+            success=False,
+            error="Application not found",
+            details=f"Job application with ID {application_id} not found or you don't have permission to access it"
+        )
+
+
 @router.patch(
     "/{application_id}/status",
     response={200: UpdateApplicationStatusResponse, 400: ErrorResponse, 404: ErrorResponse},
@@ -454,3 +454,31 @@ def update_application_status(request, application_id: int, payload: UpdateAppli
             details=str(e)
         )
 
+
+@router.delete(
+    "/{application_id}",
+    response={200: dict, 404: ErrorResponse},
+    auth=JWTAuth(),
+    summary="Delete a job application",
+    description="Delete a specific job application belonging to the authenticated user. Requires authentication."
+)
+def delete_job_application(request, application_id: int):
+    """
+    Delete a specific job application.
+    
+    Only the owner of the application can delete it.
+    Requires a valid JWT token in the Authorization header.
+    """
+    user = request.user
+    
+    try:
+        application = JobApplication.objects.get(id=application_id, user=user)
+    except JobApplication.DoesNotExist:
+        return 404, ErrorResponse(
+            success=False,
+            error="Application not found",
+            details=f"Job application with ID {application_id} not found or you don't have permission to delete it"
+        )
+    
+    application.delete()
+    return 200, {"success": True, "message": "Job application deleted successfully"}

@@ -163,6 +163,36 @@ class CreateJobFromUrlRequest(Schema):
         }
 
 
+class CreateJobListingRequest(Schema):
+    """Schema for creating a job listing manually"""
+    linkedin_url: str
+    company_name: str
+    description: str
+    title: Optional[str] = None
+    location: Optional[str] = None
+    employment_type: Optional[str] = None
+    experience_level: Optional[str] = None
+    posted_date: Optional[datetime] = None
+    applicants_count: Optional[int] = None
+    company_logo_url: Optional[str] = None
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "linkedin_url": "https://www.linkedin.com/jobs/view/1234567890",
+                "company_name": "Example Corp",
+                "description": "Short description of the role...",
+                "title": "Software Engineer",
+                "location": "Remote",
+                "employment_type": "full_time",
+                "experience_level": "mid_senior_level",
+                "posted_date": "2025-02-01T10:00:00Z",
+                "applicants_count": 12,
+                "company_logo_url": "https://example.com/logo.png"
+            }
+        }
+
+
 class ErrorResponse(Schema):
     """Schema for error response"""
     success: bool = False

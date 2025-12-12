@@ -3,12 +3,14 @@ from typing import List
 from ninja_jwt.authentication import JWTAuth
 import logging
 import time
+import uuid
 
 from .schemas import (
     ProfileSearchRequest,
     JobSearchResponse,
     JobListingSchema,
     CreateJobFromUrlRequest,
+    CreateJobListingRequest,
     ErrorResponse,
     CreateSearchProfileRequest,
     UpdateSearchProfileRequest,
@@ -377,6 +379,63 @@ def get_job_listings(
     except Exception as e:
         logger.error(f"Error getting job listings: {str(e)}")
         return []
+
+
+@router.post(
+    "/listings",
+    response={201: JobListingSchema, 400: ErrorResponse, 500: ErrorResponse},
+    summary="Add a job listing manually",
+    description="Create a job listing by providing LinkedIn URL, company name, and description"
+)
+def add_job_listing(request, payload: CreateJobListingRequest):
+    """
+    Create a job listing manually without scraping.
+    
+    Generates a UUID for the job_id and stores the listing in the database.
+    """
+    try:
+        job_id = str(uuid.uuid4())
+        linkedin_url = payload.linkedin_url.strip()
+        title = payload.title or "Unknown"
+        location = payload.location or "Unknown"
+        
+        job_listing = JobListing.objects.create(
+            job_id=job_id,
+            linkedin_url=linkedin_url,
+            title=title,
+            company_name=payload.company_name,
+            location=location,
+            description=payload.description,
+            employment_type=payload.employment_type,
+            experience_level=payload.experience_level,
+            posted_date=payload.posted_date,
+            applicants_count=payload.applicants_count,
+            company_logo_url=payload.company_logo_url,
+        )
+        
+        logger.info(f"Created job listing {job_listing.job_id}: {job_listing.title} at {job_listing.company_name}")
+        
+        return 201, JobListingSchema(
+            job_id=job_listing.job_id,
+            linkedin_url=job_listing.linkedin_url,
+            title=job_listing.title,
+            company_name=job_listing.company_name,
+            location=job_listing.location,
+            description=job_listing.description,
+            employment_type=job_listing.employment_type,
+            experience_level=job_listing.experience_level,
+            posted_date=job_listing.posted_date,
+            applicants_count=job_listing.applicants_count,
+            company_logo_url=job_listing.company_logo_url,
+        )
+        
+    except Exception as e:
+        logger.error(f"Error creating job listing: {str(e)}", exc_info=True)
+        return 500, ErrorResponse(
+            success=False,
+            error="Failed to create job listing",
+            details=str(e)
+        )
 
 
 @router.get("/listings/{job_id}", response={200: JobListingSchema, 404: ErrorResponse})
