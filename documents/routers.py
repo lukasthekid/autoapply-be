@@ -1,3 +1,5 @@
+import os
+
 from ninja import Router
 from ninja.errors import HttpError
 from ninja_jwt.authentication import JWTAuth
@@ -11,6 +13,20 @@ from datetime import datetime
 from django.utils import timezone
 
 router = Router(tags=["documents"])
+
+
+def _n8n_headers(extra_headers: dict | None = None) -> dict:
+    """
+    Build headers for n8n requests with the required API key.
+    """
+    api_key = os.getenv("N8N_API_KEY")
+    if not api_key:
+        raise HttpError(500, "N8N_API_KEY is not configured")
+
+    headers = {"api-key": api_key}
+    if extra_headers:
+        headers.update(extra_headers)
+    return headers
 
 
 @router.post(
@@ -80,7 +96,7 @@ def upload_pdf(request, payload: PDFUploadSchema):
             response = requests.post(
                 webhook_url,
                 json=webhook_data,
-                headers={"Content-Type": "application/json"},
+                headers=_n8n_headers({"Content-Type": "application/json"}),
                 timeout=30
             )
             response.raise_for_status()
@@ -157,7 +173,7 @@ def delete_user_data(request):
             response = requests.delete(
                 webhook_url,
                 json=webhook_data,
-                headers={"Content-Type": "application/json"},
+                headers=_n8n_headers({"Content-Type": "application/json"}),
                 timeout=30
             )
             response.raise_for_status()

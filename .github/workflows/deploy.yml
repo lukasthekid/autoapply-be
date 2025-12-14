@@ -152,6 +152,7 @@ jobs:
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           DB_HOST=postgres
           DB_PORT=5432
+          N8N_API_KEY=${{ secrets.N8N_API_KEY }}
           EOF
           '
       

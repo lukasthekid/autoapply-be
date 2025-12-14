@@ -1,3 +1,5 @@
+import os
+
 from ninja import Router
 from ninja_jwt.authentication import JWTAuth
 from ninja.errors import HttpError
@@ -59,6 +61,10 @@ def _call_webhook_for_cover_letter(user_data: dict, job_data: dict, language: st
         HttpError: If webhook call fails or returns empty content
     """
     webhook_url = "https://n8n.project100x.run.place/webhook/create_cover_letter"
+
+    api_key = os.getenv("N8N_API_KEY")
+    if not api_key:
+        raise HttpError(500, "N8N_API_KEY is not configured")
     
     # Prepare webhook payload
     webhook_payload = {
@@ -76,6 +82,7 @@ def _call_webhook_for_cover_letter(user_data: dict, job_data: dict, language: st
         webhook_response = requests.post(
             webhook_url,
             json=webhook_payload,
+            headers={"api-key": api_key},
             timeout=30
         )
         webhook_response.raise_for_status()
